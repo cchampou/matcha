@@ -1,0 +1,26 @@
+<% include ../partials/header %>
+<div class="uk-container uk-container-small uk-flex uk-flex-center">
+	<form class="uk-width-1-3@s">
+		<h2 class="uk-text-center">Connexion</h2>
+		<div class="uk-margin">
+			<div class="uk-inline uk-width-1-1">
+				<span class="uk-form-icon" uk-icon="icon: user"></span>
+				<input type="text" class="uk-input" placeholder="Ton adresse email"/>
+			</div>
+		</div>
+		<div class="uk-margin">
+			<div class="uk-inline uk-width-1-1">
+				<span class="uk-form-icon" uk-icon="icon: lock"></span>
+				<input type="password" class="uk-input" placeholder="Ton mot de passe"/>
+			</div>
+		</div>
+		<div class="uk-margin">
+			<div class="uk-inline uk-width-1-1">
+				<input type="submit" class="uk-input uk-button-primary" value="Je me connecte" />
+			</div>
+		</div>
+		<a href="/auth/signup">Je n'ai pas encore de compte</a><br />
+		<a href="/auth/forgot">J'ai oublié mon mot de passe</a>
+	</form>
+</div>
+<% include ../partials/footer %>
