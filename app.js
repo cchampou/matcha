@@ -13,11 +13,15 @@ app.use(express.static('public'));
 
 const auth = require('./routes/auth.js');
 const user = require('./routes/user.js');
+const chat = require('./routes/chat.js');
 
-// Routage
+// Appel des routeurs
 
 app.use('/auth', auth);
 app.use('/user', user);
+app.use('/chat', chat);
+
+// Routes de base
 
 app.get('/', (req, res) => {
 	res.render('home');
