@@ -1,41 +1,44 @@
 <% include ../partials/header %>
 <div class="uk-container uk-container-small uk-flex uk-flex-center">
-	<form class="uk-width-1-3@s">
+	<form class="uk-width-1-3@s" method="post" action="/auth/signup">
 		<h2 class="uk-text-center">Inscription</h2>
+		<% if(typeof error != 'undefined') { %>
+			<div class="uk-alert uk-alert-danger"><%= error %></div>
+		<% } %>
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
 				<span class="uk-form-icon" uk-icon="icon: info"></span>
-				<input type="text" class="uk-input" placeholder="Entre ton nom" />
+				<input type="text" class="uk-input" name="name" autocomplete="family-name" placeholder="Entre ton nom" />
 			</div>
 		</div>
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
 				<span class="uk-form-icon" uk-icon="icon: info"></span>
-				<input type="text" class="uk-input" placeholder="Ton prénom" />
+				<input type="text" class="uk-input" name="firstname" autocomplete="given-name" placeholder="Ton prénom" />
 			</div>
 		</div>
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
 				<span class="uk-form-icon" uk-icon="icon: user"></span>
-				<input type="text" class="uk-input" placeholder="Choisi un pseudo" />
+				<input type="text" class="uk-input" name="username" autocomplete="username" placeholder="Choisi un pseudo" />
 			</div>
 		</div>
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
 				<span class="uk-form-icon" uk-icon="icon: mail"></span>
-				<input type="email" class="uk-input" placeholder="Entre ton adresse email" />
+				<input type="email" class="uk-input" placeholder="Entre ton adresse email" name="email" autocomplete="email" />
 			</div>
 		</div>
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
 				<span class="uk-form-icon" uk-icon="icon: lock"></span>
-				<input type="password" class="uk-input" placeholder="Ton mot de passe" />
+				<input type="password" class="uk-input" placeholder="Ton mot de passe" name="pass" autocomplete="new-password" />
 			</div>
 		</div>
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
 				<span class="uk-form-icon" uk-icon="icon: lock"></span>
-				<input type="password" class="uk-input" placeholder="Confirme ton mot de passe" />
+				<input type="password" class="uk-input" placeholder="Confirme ton mot de passe" name="conf" autocomplete="new-password" />
 			</div>
 		</div>
 		<div class="uk-margin">
