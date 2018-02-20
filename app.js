@@ -3,6 +3,10 @@ const app = express();
 const bodyParser = require('body-parser');
 const session = require('express-session');
 
+// Express settings
+
+app.disable('x-powered-by');
+
 // Parsing request
 
 app.use(bodyParser.json()); // for parsing application/json
@@ -39,7 +43,9 @@ app.use('/chat', chat);
 // Routes de base
 
 app.get('/', (req, res) => {
-	res.render('home');
+	const data = {};
+	data.userId = req.session.userId;
+	res.render('home', data);
 });
 
 // Démarrage du serveur

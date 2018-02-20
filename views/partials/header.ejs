@@ -13,24 +13,28 @@
 		<a href="/" class="uk-navbar-item uk-logo">Matcha</a>
 	</div>
 	<div class="uk-navbar-right uk-margin-right">
+		<% if(typeof userId != 'undefined') { %>
+			<ul class="uk-navbar-nav">
+				<li>
+					<a href="/chat" uk-icon="icon: comment" ></a>
+				</li>
+				<li>
+					<a href="/user/<%= userId %>" uk-icon="icon: user" ></a>
+				</li>
+				<li class="uk-parent">
+					<a href="#" uk-icon="icon: bell"><span class="uk-badge">7</span></a>
+					<div class="uk-navbar-dropdown uk-navbar-dropdown-bottom-left">
+						<ul class="uk-nav uk-navbar-dropdown-nav">
+							<li class="uk-active"><a href="#">Léo a consulté ton profil</a></li>
+						</ul>
+					</div>
+				</li>
+				<li>
+					<a href="/auth/signout" uk-icon="icon: sign-out" ></a>
+				</li>
+			</ul>
+		<% } else { %>
 		<ul class="uk-navbar-nav">
-			<li>
-				<a href="/chat" uk-icon="icon: comment" ></a>
-			</li>
-			<li>
-				<a href="/user/me" uk-icon="icon: user" ></a>
-			</li>
-			<li class="uk-parent">
-				<a href="#" uk-icon="icon: bell"><span class="uk-badge">7</span></a>
-				<div class="uk-navbar-dropdown uk-navbar-dropdown-bottom-left">
-					<ul class="uk-nav uk-navbar-dropdown-nav">
-						<li class="uk-active"><a href="#">Léo a consulté ton profil</a></li>
-					</ul>
-				</div>
-			</li>
-			<li>
-				<a href="/auth/signin" uk-icon="icon: sign-out" ></a>
-			</li>
 			<li>
 				<a href="/auth/signin" uk-icon="sign-in"></a>
 			</li>
@@ -38,5 +42,6 @@
 				<a href="/auth/signup" uk-icon="user"></a>
 			</li>
 		</ul>
+		<% } %>
 	</div>
 </nav>

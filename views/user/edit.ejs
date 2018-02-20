@@ -1,0 +1,58 @@
+<% include ../partials/header %>
+<div class="uk-container uk-container-small">
+	<div class="uk-grid">
+		<div class="uk-width-1-2@s uk-width-1-4@m">
+			<% if (user.images.length) { %>
+				<img src="/img/people.svg" alt="Default profile picture" class="uk-margin-large-top"/>
+			<% } else { %>
+				<img src="<%= user.images[0] %>" alt="Default profile picture" class="uk-margin-large-top"/>
+				<ul class="uk-thumbnav uk-margin-auto uk-margin-top uk-margin-bottom">
+					<% for (let i = 1; i < user.images.length; i++) { %>
+						<li><a href=""><img src="/img/people.svg" alt="" width="50"></a></li>
+					<% } %>
+				</ul>
+			<% } %>
+		</div>
+		<div class="uk-width-1-2@s uk-width-3-4@m">
+			<h1>Editer mon profil</h1>
+			<% if (typeof error != 'undefined') { %><p class="uk-alert uk-alert-danger"><%= error %></p><% } %>
+			<form method="post" action="/user/edit" class="uk-grid-small" uk-grid>
+				<div class="uk-width-1-2">
+					<label>Nom</label>
+					<input type="text" name="name" placeholder="Nom..." class="uk-input" value="<%= user.name %>" />
+				</div>
+				<div class="uk-width-1-2">
+					<label>Prénom</label>
+					<input type="text" name="firstname" placeholder="Prénom..." class="uk-input" value="<%= user.firstname %>" />
+				</div>
+				<div class="uk-width-1 uk-text-center">
+					<label>Je suis : </label>
+					<input type="radio" name="gender" class="uk-radio" value="0" <%= (user.gender == '0') ? 'checked' : '' %> /> Un homme
+					<input type="radio" name="gender" class="uk-radio" value="1" <%= (user.gender == '1') ? 'checked' : '' %> /> Une femme
+				</div>
+				<div class="uk-width-1-2">
+					<label>Interessé par</label><br />
+					<input type="radio" class="uk-radio" name="interest" value="0" <%= (user.interest == '0') ? 'checked' : '' %>> Hommes<br />
+					<input type="radio" class="uk-radio" name="interest" value="1" <%= (user.interest == '1') ? 'checked' : '' %>> Femmes<br />
+					<input type="radio" class="uk-radio" name="interest" value="2" <%= (user.interest == '2') ? 'checked' : '' %>> Femmes & Hommes
+				</div>
+				<div class="uk-width-1-4">
+					<label>Âge</label>
+					<input type="number" name="age" placeholder="Âge..." value="<%= user.age %>" class="uk-input" />
+				</div>
+				<div class="uk-width-1-4">
+					<label>Ville</label>
+					<input type="text" name="location" placeholder="Ville..." value="<%= user.location %>" class="uk-input" />
+				</div>
+				<div class="uk-width-1">
+					<label>Biographie<label>
+					<textarea name="bio" placeholder="Courte biographie..." class="uk-textarea" rows="5"><%= user.bio %></textarea>
+				</div>
+				<div class="uk-width-1">
+					<input type="submit" class="uk-button uk-button-primary" value="Enregistrer" name="edit" />
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<% include ../partials/footer %>
