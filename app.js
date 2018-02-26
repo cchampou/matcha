@@ -107,6 +107,6 @@ io.on('connection', (socket) => {
 
 // Démarrage du serveur
 
-http.listen(3000, () => {
-	console.log('Matcha started on port 3000');
+http.listen(8080, () => {
+	console.log('Matcha started on port 8080');
 });
