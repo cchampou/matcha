@@ -3,8 +3,6 @@ const database = require('../config/database.js');
 const bcrypt = require('bcrypt');
 const db = database.db;
 
-db.connect();
-
 exports.signUp = async (fname, name, uname, email, pass, conf, gender) => {
 	if (pass.length < 8) {
 		throw "Le mot de passe doit contenir au moins 8 caracteres";
@@ -54,7 +52,7 @@ exports.signIn = (email, password) => {
 exports.get = (id) => {
 	return new Promise((resolve, reject) => {
 		console.log("Getting user "+id);
-		db.query("SELECT id, name, firstname, username, gender, interest, bio, images, age, location, pop FROM users WHERE id = ?", [id], (err, data) => {
+		db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id = ?", [id], (err, data) => {
 			if (err) {
 				reject(err);
 			} else if (!data[0]) {
@@ -66,18 +64,50 @@ exports.get = (id) => {
 	});
 }
 
-exports.update = (id, firstname, name, gender, interest, age, location, bio) => {
+exports.getAll = () => {
+	return new Promise((resolve, reject) => {
+		console.log("Starting user listing");
+		db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users", (err, data) => {
+			if (err) {
+				reject(err);
+			} else {
+				console.log("User listed successfully");
+				resolve(data);
+			}
+		})
+	});
+}
+
+exports.update = (id, firstname, name, username, gender, interest, age, location, bio, photo1, photo2, photo3, photo4, photo5, tags) => {
 	return new Promise(async (resolve, reject) => {
 		console.log("Starting user update with id "+id);
-		db.query("UPDATE users SET ?", {
+		const toUpdate = {
 			name: name,
 			firstname: firstname,
+			username: username,
 			gender: gender,
 			interest: interest,
 			age: age,
 			location: location,
-			bio: bio
-		}, (err, data) => {
+			bio: bio,
+			tags: tags
+		};
+		if (photo1) {
+			toUpdate.photo1 = photo1;
+		}
+		if (photo2) {
+			toUpdate.photo2 = photo2;
+		}
+		if (photo3) {
+			toUpdate.photo3 = photo3;
+		}
+		if (photo4) {
+			toUpdate.photo4 = photo4;
+		}
+		if (photo5) {
+			toUpdate.photo5 = photo5;
+		}
+		db.query("UPDATE users SET ? WHERE id = ?", [toUpdate, id], (err, data) => {
 			if (err) {
 				reject(err);
 			} else {

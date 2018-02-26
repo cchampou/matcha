@@ -1,15 +1,31 @@
 const express = require('express');
 const router = express.Router();
+const notifModel = require('../models/notif.js');
+const likeModel = require('../models/like.js');
+const userModel = require('../models/user.js');
+const messageModel = require('../models/message.js');
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
 	const data = {};
+	if (!req.session.userId) {
+		return res.redirect(302, '/auth/signin');
+	}
+	data.users = await likeModel.getMatch(req.session.userId);
+	data.notifs = await notifModel.get(req.session.userId);
 	data.userId = req.session.userId;
 	res.render('chat/default.ejs', data);
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
 	const data = {};
+	if (!req.session.userId) {
+		return res.redirect(302, '/auth/signin');
+	}
 	data.userId = req.session.userId;
+	data.notifs = await notifModel.get(req.session.userId);
+	data.messages = await messageModel.get(req.session.userId, req.params.id);
+	await messageModel.read(req.session.userId, req.params.id);
+	data.user = await userModel.get(req.params.id);
 	res.render('chat/chatting.ejs', data);
 });
 

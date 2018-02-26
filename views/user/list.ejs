@@ -1,0 +1,76 @@
+<% include ../partials/header %>
+<div class="uk-container uk-container-large">
+	<h1 class="uk-text-center uk-margin">Suggestions</h1>
+	<div class="uk-grid">
+		<div class="uk-width-1-2@s uk-width-1-4@m">
+			<h2>Filtrer les résultats</h2>
+			<form class="uk-grid">
+				<div class="uk-width-1-2">
+					<label>Âge min</label>
+					<input type="number" class="uk-input" min="0" />
+				</div>
+				<div class="uk-width-1-2">
+					<label>Âge max</label>
+					<input type="number" class="uk-input" />
+				</div>
+				<div class="uk-width-1-2">
+					<label>Popularité min</label>
+					<input type="number" class="uk-input" min="0" />
+				</div>
+				<div class="uk-width-1-2">
+					<label>Popularité max</label>
+					<input type="number" class="uk-input" />
+				</div>
+				<div class="uk-width-1">
+					<label>Ville</label>
+					<input type="text" class="uk-input" />
+				</div>
+				<div class="uk-width-1">
+					<label>Dans un rayon de</label>
+					<input type="range" class="uk-range" />
+				</div>
+				<div class="uk-width-1 uk-margin">
+					<input type="submit" class="uk-button uk-button-primary" value="Filtrer" />
+				</div>
+			</form>
+		</div>
+		<div class="uk-width-1-2@s uk-width-3-4@m uk-grid uk-grid-match" uk-grid>
+			<% for (let i = 0; i < users.length;i++) { %>
+				<div class="uk-width-1-4">
+					<div class="uk-card uk-card-default">
+						<div class="uk-card-media-top">
+							<% if (users[i].photo1)  { %>
+								<div style="background-image: url('/uploads/<%= users[i].photo1 %>'); width: 100%; padding-top: 100%; background-size: cover; background-position: center;">
+								</div>
+							<% } else { %>
+								<img src="/img/people.svg" alt="profile picture">
+							<% } %>
+							<span class="uk-position-absolute uk-overlay" style="left: 0%; top: 0%; color: #8BC34A; font-size: 2em; padding: 0; margin: 5px; line-height: 1em; display: none;" data-onid="<%= users[i].id %>" href="#">◉</span>
+						</div>
+						<div class="uk-card-body">
+							<h3 class="uk-card-title"><%= users[i].username %> <span class="uk-badge"><%= users[i].pop %></span></h3>
+							<p>
+								<%= (users[i].gender == '0') ? 'Homme' : '' %>
+								<%= (users[i].gender == '1') ? 'Femme' : '' %>
+								<%= (users[i].age != null) ? users[i].age+' ans' : '' %>
+							</p>
+						</div>
+						<div class="uk-card-footer">
+							<a href="/user/<%= users[i].id %>">Voir le profil</a>
+						</div>
+					</div>
+				</div>
+			<% } %>
+		</div>
+	</div>
+</div>
+<script>
+socket.on('login', (user) => {
+	$('[data-onid='+user.id+']').show();
+})
+
+socket.on('logout', (user) => {
+	$('[data-onid='+user.id+']').hide();
+})
+</script>
+<% include ../partials/footer %>

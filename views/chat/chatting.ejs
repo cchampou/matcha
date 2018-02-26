@@ -1,42 +1,31 @@
 <% include ../partials/header %>
 <div class="uk-container">
-	<h1 class="uk-text-center">Conversation avec Lise</h1>
+	<h1 class="uk-text-center">Conversation avec <%= user.firstname %></h1>
 	<div class="uk-grid">
 		<div class="uk-width-1-4">
-			<img src="/img/people.svg" />
+			<img src="<%= (user.photo1) ? '/uploads/'+user.photo1:'/img/people.svg' %>" />
 		</div>
 		<div class="uk-width-3-4">
-			<div class="uk-grid uk-flex-left uk-margin-left uk-margin-right">
-				<p class="uk-card uk-card-default uk-padding-small uk-width-4-5">
-					Hey ! Comment tu va ?
-				</p>
+			<div id="canvas" class="uk-margin">
+				<% for (var i = 0; i < messages.length; i++) { %>
+					<% if (messages[i].owner == userId) { %>
+						<div class="uk-grid uk-flex-right uk-margin-left uk-margin-right">
+							<p class="uk-card uk-card-primary uk-padding-small uk-width-4-5">
+								<%= messages[i].content %>
+							</p>
+						</div>
+					<% } else { %>
+						<div class="uk-grid uk-flex-left uk-margin-left uk-margin-right">
+							<p class="uk-card uk-card-default uk-padding-small uk-width-4-5">
+								<%= messages[i].content %>
+							</p>
+						</div>
+					<% } %>
+				<% } %>
 			</div>
-			<div class="uk-grid uk-flex-right uk-margin-left uk-margin-right">
-				<p class="uk-card uk-card-primary uk-padding-small uk-width-4-5">
-					En pleine forme ! Et toi ?
-				</p>
-			</div>
-			<div class="uk-grid uk-flex-left uk-margin-left uk-margin-right">
-				<p class="uk-card uk-card-default uk-padding-small uk-width-4-5">
-					On va se boire un verre en fin de semaine ?
-				</p>
-			</div>
-			<div class="uk-grid uk-flex-right uk-margin-left uk-margin-right">
-				<p class="uk-card uk-card-primary uk-padding-small uk-width-4-5">
-					Jeudi ?
-				</p>
-				<p class="uk-card uk-card-primary uk-padding-small uk-width-4-5">
-					Avant la soirée chez Alex.
-				</p>
-			</div>
-			<div class="uk-grid uk-flex-left uk-margin-left uk-margin-right">
-				<p class="uk-card uk-card-default uk-padding-small uk-width-4-5">
-					Oui très bonne idée ! :)
-				</p>
-			</div>
-			<form class="uk-grid">
+			<form class="uk-grid" onsubmit="return sendMessage(event);">
 				<div class="uk-width-4-5">
-					<input type="text" class="uk-input" placeholder="Tape ton message ici ..."/>
+					<input type="text" class="uk-input" id="messageContent" placeholder="Tape ton message ici ..."/>
 				</div>
 				<div class="uk-width-1-5">
 					<input type="submit" class="uk-input" value="Envoyer"/>
@@ -45,4 +34,32 @@
 		</div>
 	</div>
 </div>
+<script>
+$(document).ready(() => {
+	$('#canvas').scrollTop($('#canvas')[0].scrollHeight);
+});
+
+socket.on('message', (opts) => {
+	$("#canvas").append('<div class="uk-grid uk-flex-left uk-margin-left uk-margin-right"><p class="uk-card uk-card-default uk-padding-small uk-width-4-5">'+opts.content+'</p></div>');
+	$('#canvas').stop().animate({
+		scrollTop: $('#canvas')[0].scrollHeight
+	}, 250);
+});
+
+function sendMessage(e)
+{
+	e.preventDefault();
+	const content = $("#messageContent").val();
+	$("#canvas").append('<div class="uk-grid uk-flex-right uk-margin-left uk-margin-right"><p class="uk-card uk-card-primary uk-padding-small uk-width-4-5">'+content+'</p></div>');
+	$('#canvas').stop().animate({
+		scrollTop: $('#canvas')[0].scrollHeight
+	}, 250);
+	$("#messageContent").val('');
+	socket.emit('message', {
+		from: <%= userId %>,
+		to: <%= user.id %>,
+		content: content
+	});
+}
+</script>
 <% include ../partials/footer %>

@@ -4,28 +4,53 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" type="text/css" href="/css/uikit.min.css" />
+	<link rel="stylesheet" type="text/css" href="/css/tags.css" />
+	<link rel="stylesheet" type="text/css" href="/css/chat.css" />
+	<link rel="icon" href="/img/logo.png" />
 	<script src="/js/uikit.min.js"></script>
 	<script src="/js/uikit-icons.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="/js/tags.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
 </head>
 <body>
+<script>
+	const socket = io();
+	<% if (typeof userId != 'undefined') { %>
+		socket.emit('login', {
+			userId : <%= userId %>
+		});
+	<% } %>
+</script>
 <nav class="uk-navbar-container uk-navbar uk-navbar-transparent" uk-navbar>
 	<div class="uk-navbar-left uk-margin-large-left">
-		<a href="/" class="uk-navbar-item uk-logo">Matcha</a>
+		<a href="/" class="uk-navbar-item uk-logo"><img src="/img/logo.svg" class="uk-navbar-item uk-logo" alt="logo" height="50"/> Matcha</a>
 	</div>
 	<div class="uk-navbar-right uk-margin-right">
 		<% if(typeof userId != 'undefined') { %>
 			<ul class="uk-navbar-nav">
 				<li>
-					<a href="/chat" uk-icon="icon: comment" ></a>
+					<a href="/user" uk-icon="icon: world" >Explore&nbsp;&nbsp;</a>
 				</li>
 				<li>
-					<a href="/user/<%= userId %>" uk-icon="icon: user" ></a>
+					<a href="/chat" uk-icon="icon: comment" >Chat&nbsp;&nbsp;</a>
+				</li>
+				<li>
+					<a href="/user/<%= userId %>" uk-icon="icon: user" >Profile&nbsp;&nbsp;</a>
 				</li>
 				<li class="uk-parent">
 					<a href="#" uk-icon="icon: bell"><span class="uk-badge">7</span></a>
 					<div class="uk-navbar-dropdown uk-navbar-dropdown-bottom-left">
 						<ul class="uk-nav uk-navbar-dropdown-nav">
-							<li class="uk-active"><a href="#">Léo a consulté ton profil</a></li>
+							<% for (let i = 0; i < notifs.length; i++) { %>
+								<li class="uk-active">
+									<a href="#">
+										<%= notifs[i].firstname %>
+										<%= notifs[i].type == 0 ? ' a visité ton profil' : '' %>
+										<%= notifs[i].type == 1 ? ' te kiff !' : '' %>
+										<%= notifs[i].type == 2 ? ' te kiff aussi ! MATCH !' : '' %>
+									</a></li>
+							<% } %>
 						</ul>
 					</div>
 				</li>
