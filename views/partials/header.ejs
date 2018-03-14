@@ -30,16 +30,19 @@
 		<% if(typeof userId != 'undefined') { %>
 			<ul class="uk-navbar-nav">
 				<li>
+					<a href="/user/search" uk-icon="icon: search" >Search&nbsp;&nbsp;</a>
+				</li>
+				<li>
 					<a href="/user" uk-icon="icon: world" >Explore&nbsp;&nbsp;</a>
 				</li>
 				<li>
-					<a href="/chat" uk-icon="icon: comment" >Chat&nbsp;&nbsp;</a>
+					<a href="/chat" uk-icon="icon: comment" >Chat&nbsp;<span class="uk-badge"><%= newmessages.length %></span>&nbsp;</a>
 				</li>
 				<li>
 					<a href="/user/<%= userId %>" uk-icon="icon: user" >Profile&nbsp;&nbsp;</a>
 				</li>
 				<li class="uk-parent">
-					<a href="#" uk-icon="icon: bell"><span class="uk-badge">7</span></a>
+					<a href="#" uk-icon="icon: bell"><span class="uk-badge"><%= notifs.length %></span></a>
 					<div class="uk-navbar-dropdown uk-navbar-dropdown-bottom-left">
 						<ul class="uk-nav uk-navbar-dropdown-nav">
 							<% for (let i = 0; i < notifs.length; i++) { %>

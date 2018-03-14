@@ -95,7 +95,19 @@ module.exports = {
 	getAll: (req, res) => {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const data = await userModel.getAll();
+				const data = await userModel.getAll(req.session.userId);
+				resolve(data);
+			} catch(e) {
+				console.log(e);
+				reject(e);
+			}
+		});
+	},
+
+	getFiltered: (req, res) => {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const data = await userModel.getFiltered(req.session.userId, req.body.ageMin, req.body.ageMax, req.body.popMin, req.body.popMax);
 				resolve(data);
 			} catch(e) {
 				console.log(e);

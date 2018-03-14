@@ -1,0 +1,35 @@
+<% include ../partials/header %>
+<div class="uk-container uk-container-small">
+	<h1 class="uk-text-center uk-margin">Rechercher</h1>
+		<form class="uk-grid" method="post" action="/user">
+			<div class="uk-width-1-2">
+				<label>Âge min</label>
+				<input type="number" class="uk-input" min="0" name="ageMin" />
+			</div>
+			<div class="uk-width-1-2">
+				<label>Âge max</label>
+				<input type="number" class="uk-input" name="ageMax" />
+			</div>
+			<div class="uk-width-1-2">
+				<label>Popularité min</label>
+				<input type="number" class="uk-input" min="0" name="popMin" />
+			</div>
+			<div class="uk-width-1-2">
+				<label>Popularité max</label>
+				<input type="number" class="uk-input" name="popMax" />
+			</div>
+			<div class="uk-width-1">
+				<label>Ville</label>
+				<input type="text" class="uk-input" />
+			</div>
+			<div class="uk-width-1">
+				<label>Dans un rayon de</label>
+				<input type="range" class="uk-range" />
+			</div>
+			<div class="uk-width-1 uk-margin">
+				<input type="submit" class="uk-button uk-button-primary" value="Filtrer" />
+			</div>
+		</form>
+	</div>
+</div>
+<% include ../partials/footer %>

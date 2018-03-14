@@ -56,6 +56,7 @@ app.get('/', async (req, res) => {
 	const data = {};
 	if (req.session.userId) {
 		data.notifs = await notifModel.get(req.session.userId);
+		data.newmessages = await messageModel.getUnread(req.session.userId);
 		data.userId = req.session.userId;
 	}
 	res.render('home', data);

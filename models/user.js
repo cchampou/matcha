@@ -64,10 +64,52 @@ exports.get = (id) => {
 	});
 }
 
-exports.getAll = () => {
+exports.getAll = (exclude) => {
 	return new Promise((resolve, reject) => {
 		console.log("Starting user listing");
-		db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users", (err, data) => {
+		db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id != ?", [exclude], (err, data) => {
+			if (err) {
+				reject(err);
+			} else {
+				console.log("User listed successfully");
+				resolve(data);
+			}
+		})
+	});
+}
+
+exports.block = (from, to) => {
+	return new Promise((resolve, reject) => {
+		console.log("Starting blocking user");
+		db.query("INSERT INTO blocks SET ?", {
+			owner: from,
+			target: to
+		}, (err, data) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve();
+			}
+		})
+	})
+}
+
+exports.getFiltered = (exclude, ageMin, ageMax, popMin, popMax, tags) => {
+	return new Promise((resolve, reject) => {
+		console.log("Starting user listing");
+		if (!ageMin) {
+			ageMin = 0;
+		}
+		if (!ageMax) {
+			ageMax = 1000;
+		}
+		if (!popMin) {
+			popMin = 0;
+		}
+		if (!popMax) {
+			popMax = 1000000;
+		}
+		db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id != ? AND age >= ? AND age <= ? AND pop >= ? AND pop <= ? ", [exclude, ageMin, ageMax, popMin, popMax], (err, data) => {
 			if (err) {
 				reject(err);
 			} else {

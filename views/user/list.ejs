@@ -1,25 +1,25 @@
 <% include ../partials/header %>
-<div class="uk-container uk-container-large">
-	<h1 class="uk-text-center uk-margin">Suggestions</h1>
+<div class="uk-container uk-container-large uk-text-center">
+	<h1 class="uk-text-center uk-margin">Profils proposés</h1>
 	<div class="uk-grid">
 		<div class="uk-width-1-2@s uk-width-1-4@m">
 			<h2>Filtrer les résultats</h2>
-			<form class="uk-grid">
+			<form class="uk-grid" method="post" action="/user">
 				<div class="uk-width-1-2">
 					<label>Âge min</label>
-					<input type="number" class="uk-input" min="0" />
+					<input type="number" class="uk-input" min="0" name="ageMin" />
 				</div>
 				<div class="uk-width-1-2">
 					<label>Âge max</label>
-					<input type="number" class="uk-input" />
+					<input type="number" class="uk-input" name="ageMax" />
 				</div>
 				<div class="uk-width-1-2">
 					<label>Popularité min</label>
-					<input type="number" class="uk-input" min="0" />
+					<input type="number" class="uk-input" min="0" name="popMin" />
 				</div>
 				<div class="uk-width-1-2">
 					<label>Popularité max</label>
-					<input type="number" class="uk-input" />
+					<input type="number" class="uk-input" name="popMax" />
 				</div>
 				<div class="uk-width-1">
 					<label>Ville</label>

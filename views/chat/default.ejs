@@ -5,6 +5,7 @@
 		<% for (var i = 0; i < users.length; i++) { %>
 			<div class="uk-width-1-4">
 				<a href="/chat/<%= users[i].id %>" class="uk-inline">
+					<span class="uk-position-absolute uk-badge" style="right: 5%; top: 10%;" href="#"><%= users[i].unread %></span>
 					<span class="uk-position-absolute uk-overlay" style="left: 0%; top: 0%; color: #8BC34A; font-size: 2em; padding: 0; margin: 5px; line-height: 1em; display: none;" data-onid="<%= users[i].id %>" href="#">◉</span>
 					<img src="<%= (users[i].photo1) ? '/uploads/'+users[i].photo1 : '/img/people.svg' %>" />
 					<div class="uk-overlay uk-position-bottom uk-overlay-default uk-padding-small uk-text-center"><%= users[i].firstname %></div>
