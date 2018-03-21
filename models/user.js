@@ -10,8 +10,9 @@ const mainConfig = require('../config/main.js');
 
 exports.signUp = (fname, name, uname, email, pass, conf, gender) => {
 	return new Promise(async (resolve, reject) => {
-		if (pass.length < 8) {
-			reject("Le mot de passe doit contenir au moins 8 caracteres");
+		const regexp = /[a-z]+[1-9]+/i;
+		if (pass.length < 8 || !regexp.test(pass)) {
+			reject("Le mot de passe doit contenir au moins 8 caracteres, des chiffres et des lettres");
 		}
 		if (pass != conf) {
 			reject("Le mot de passe et sa confirmation ne correspondent pas");
@@ -80,7 +81,7 @@ exports.signIn = (email, password) => {
 exports.get = (id) => {
 	return new Promise((resolve, reject) => {
 		console.log("Getting user "+id);
-		db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id = ?", [id], (err, data) => {
+		db.query("SELECT id, name, firstname, username, email, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id = ?", [id], (err, data) => {
 			if (err) {
 				reject(err);
 			} else if (!data[0]) {
@@ -104,22 +105,6 @@ exports.getAll = (exclude) => {
 			}
 		})
 	});
-}
-
-exports.block = (from, to) => {
-	return new Promise((resolve, reject) => {
-		console.log("Starting blocking user");
-		db.query("INSERT INTO blocks SET ?", {
-			owner: from,
-			target: to
-		}, (err, data) => {
-			if (err) {
-				reject(err);
-			} else {
-				resolve();
-			}
-		})
-	})
 }
 
 exports.getFiltered = (exclude, ageMin, ageMax, popMin, popMax, tags) => {
@@ -148,12 +133,13 @@ exports.getFiltered = (exclude, ageMin, ageMax, popMin, popMax, tags) => {
 	});
 }
 
-exports.update = (id, firstname, name, username, gender, interest, age, location, bio, photo1, photo2, photo3, photo4, photo5, tags) => {
+exports.update = (id, firstname, name, username, email, gender, interest, age, location, bio, photo1, photo2, photo3, photo4, photo5, tags) => {
 	return new Promise(async (resolve, reject) => {
 		console.log("Starting user update with id "+id);
 		const toUpdate = {
 			name: name,
 			firstname: firstname,
+			email: email,
 			username: username,
 			gender: gender,
 			interest: interest,

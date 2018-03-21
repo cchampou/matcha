@@ -39,7 +39,7 @@
 					<%= data.gender ? 'Elle' : 'Il' %> me kiff&nbsp;&nbsp;
 				<% } %>
 				<a href="/like/<%= data.like ? 'delete' : 'create' %>/<%= user.id %>" class="uk-button <%= data.like ? 'uk-button-danger' : 'uk-button-default' %>"><span class="uk-icon" uk-icon="heart"></span> Je <%= data.gender ? 'la' : 'le' %> kiff<%= data.like ? ' plus' : '' %></a>
-				<a href="/" class="uk-button uk-button-secondary"><span class="uk-icon" uk-icon="ban"></span> Bloquer</a>
+				<a href="/block/toggle/<%= user.id %>" class="uk-button uk-button-secondary"><span class="uk-icon" uk-icon="ban"></span> Bloquer</a>
 			<% } %>
 			<div class="uk-margin">
 				<ul id="taglist">

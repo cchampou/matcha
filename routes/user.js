@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const fetch = require('node-fetch');
 const userController = require('../controllers/user.js');
 const tagModel = require('../models/tag.js');
 const notifModel = require('../models/notif.js');
 const messageModel = require('../models/message.js');
 const multer = require('multer');
 const upload = multer({ dest: 'public/uploads/' });
+const config = require('../config/main.js');
 
 router.get('/', async (req, res) => {
 	const data = {};
@@ -101,10 +103,15 @@ router.get('/edit', async (req, res) => {
 		data.tags = await tagModel.get();
 		data.user = await userController.get(req, res);
 		if (!data.user.location) {
-			console.log("Missing location, looking via IP");
-			console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+			fetch('http://ip-api.com/json/'+config.myip)
+				.then(res => res.json())
+				.then((json) => {
+					data.user.location = json.zip+' '+json.city;
+					res.render('user/edit', data);
+				});
+		} else {
+			res.render('user/edit', data);
 		}
-		res.render('user/edit', data);
 	} catch (e) {
 		console.log(e);
 		res.redirect(302, '/');

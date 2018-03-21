@@ -41,6 +41,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x
 const auth = require('./routes/auth.js');
 const user = require('./routes/user.js');
 const like = require('./routes/like.js');
+const block = require('./routes/block.js');
 const chat = require('./routes/chat.js');
 
 // Appel des routeurs
@@ -49,6 +50,7 @@ app.use('/auth', auth);
 app.use('/user', user);
 app.use('/chat', chat);
 app.use('/like', like);
+app.use('/block', block);
 
 // Routes de base
 

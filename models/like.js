@@ -2,25 +2,43 @@
 const database = require('../config/database.js');
 const db = database.db;
 const notifModel = require('./notif.js');
+const popModel = require("./pop.js");
 
 exports.create = async (from, to) => {
-	await notifModel.create(from, to, 1);
-	db.query('INSERT INTO likes SET ?', {
-		owner: from,
-		target: to
-	}, (err, data) => {
-		if (err) {
-			console.log(err);
-		}
+	return new Promise(async (resolve, reject) => {
+		await notifModel.create(from, to, 1);
+		db.query('INSERT INTO likes SET ?', {
+			owner: from,
+			target: to
+		}, async (err, data) => {
+			if (err) {
+				reject(err);
+			} else {
+				try {
+					await popModel.alter(to, +10);
+					resolve();
+				} catch(e) {
+					reject(e);
+				}
+			}
+		});
 	});
 }
 
 exports.delete = (from, to) => {
-	console.log("Dislike from "+from+" to "+to);
-	db.query('DELETE FROM likes WHERE owner = ? AND target = ?', [from, to], (err, data) => {
-		if (err) {
-			console.log(err);
-		}
+	return new Promise(async (resolve, reject) => {
+		db.query('DELETE FROM likes WHERE owner = ? AND target = ?', [from, to], async (err, data) => {
+			if (err) {
+				reject(err);
+			} else {
+				try {
+					await popModel.alter(to, -10);
+					resolve();
+				} catch(e) {
+					reject(e);
+				}
+			}
+		});
 	});
 }
 

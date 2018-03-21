@@ -83,6 +83,7 @@ module.exports = {
 					req.body.firstname,
 					req.body.name,
 					req.body.username,
+					req.body.email,
 					req.body.gender,
 					req.body.interest,
 					req.body.age,
