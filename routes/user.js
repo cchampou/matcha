@@ -84,7 +84,6 @@ router.post('/edit', editUploads, async (req, res) => {
 			data.user = await userController.get(req, res);
 			res.render('user/edit', data);
 		} catch(e) {
-			console.log(e);
 			res.redirect(302, '/');
 		}
 	}
@@ -101,6 +100,10 @@ router.get('/edit', async (req, res) => {
 		data.notifs = await notifModel.get(req.session.userId);
 		data.tags = await tagModel.get();
 		data.user = await userController.get(req, res);
+		if (!data.user.location) {
+			console.log("Missing location, looking via IP");
+			console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+		}
 		res.render('user/edit', data);
 	} catch (e) {
 		console.log(e);
