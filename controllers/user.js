@@ -6,15 +6,26 @@ const notifModel = require('../models/notif.js')
 
 module.exports = {
 
-	signUp: (req, res) => {
+	signUp: async (req, res) => {
 		const output = {};
 		if (!req.body.firstname || !req.body.name || !req.body.username || !req.body.email || !req.body.pass || !req.body.conf || !req.body.gender) {
 			output.error = "Merci de renseigner tous les champs";
+			output.name = req.body.name;
+			output.firstname = req.body.firstname;
+			output.username = req.body.username;
+			output.email = req.body.email;
+			output.gender = req.body.gender;
 		} else {
 			try {
-				userModel.signUp(req.body.firstname, req.body.name, req.body.username, req.body.email, req.body.pass, req.body.conf, req.body.gender);
+				await userModel.signUp(req.body.firstname, req.body.name, req.body.username, req.body.email, req.body.pass, req.body.conf, req.body.gender);
+				return res.redirect('/auth/signin/ok');
 			} catch(e) {
 				output.error = e;
+				output.name = req.body.name;
+				output.firstname = req.body.firstname;
+				output.username = req.body.username;
+				output.email = req.body.email;
+				output.gender = req.body.gender;
 			}
 		}
 		return output;
@@ -98,7 +109,6 @@ module.exports = {
 				const data = await userModel.getAll(req.session.userId);
 				resolve(data);
 			} catch(e) {
-				console.log(e);
 				reject(e);
 			}
 		});
@@ -110,9 +120,43 @@ module.exports = {
 				const data = await userModel.getFiltered(req.session.userId, req.body.ageMin, req.body.ageMax, req.body.popMin, req.body.popMax);
 				resolve(data);
 			} catch(e) {
-				console.log(e);
 				reject(e);
 			}
 		});
+	},
+
+	validate: async (req, res) => {
+		try {
+			await userModel.validate(req.params.hash);
+			return {};
+		} catch (e) {
+			return { error : e };
+		}
+	},
+
+	forgot: async (req, res) => {
+		if (!req.body.email) {
+			return { error: "Veuillez entrer votre adresse email" }
+		}
+		try {
+			return { message : await userModel.forgot(req.body.email) }
+		} catch (e) {
+			return { error: e }
+		}
+	},
+
+	reset: async (req, res) => {
+		if (!req.body.hash) {
+			return { error: "Le lien de récuération de mot de passe est incorrecte" }
+		}
+		if (!req.body.password || !req.body.confirmation) {
+			return { error: "Veuillez renseigner tous les champs" }
+		}
+		try {
+			await userModel.reset(req.body.hash, req.body.password, req.body.confirmation);
+			res.redirect("/auth/signin/resetok");
+		} catch (e) {
+			return { error : e }
+		}
 	}
 }

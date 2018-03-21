@@ -1,0 +1,9 @@
+<% include ../partials/header %>
+<div class="uk-container uk-container-small uk-flex uk-flex-center">
+	<% if(typeof error != 'undefined') { %>
+		<p class="uk-alert uk-alert-danger"><%= error %> <a href="/">Retourner à l'accueil</a></p>
+	<% } else { %>
+		<p class="uk-alert uk-alert-success">Votre compte a bien été activé. <a href="/">Retourner à l'accueil</a></p>
+	<% } %>
+</div>
+<% include ../partials/footer %>

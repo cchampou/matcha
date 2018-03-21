@@ -1,0 +1,10 @@
+<html>
+<head>
+</head>
+<body>
+	<h1>Bonjour <%= firstname %>,</h1>
+	<p>Il semblerait que vous ayez oublié le mot de passe associé à votre adresse email sur Matcha. Grâce à cet email, vous allez pouvoir en définir un nouveau.</p><br />
+	<a href="<%= host %>/auth/reset/<%= tmp_hash %>">Définir un nouveau mot de passe</a><br /><br />
+	<p>Cordialement,<br />La Team Matcha</p>
+</body>
+</html>

@@ -1,20 +1,22 @@
 <% include ../partials/header %>
 <div class="uk-container uk-container-small uk-flex uk-flex-center">
-	<form class="uk-width-1-3@s">
+	<form class="uk-width-1-3@s" method="post" action="/auth/reset">
 		<h2 class="uk-text-center">Nouveau mot de passe</h2>
+		<% if (typeof error != 'undefined') { %><p class="uk-alert uk-alert-danger"><%= error %></p><% } %>
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
 				<span class="uk-form-icon" uk-icon="icon: lock"></span>
-				<input type="password" class="uk-input" placeholder="Nouveau mot de passe" />
+				<input type="password" class="uk-input" placeholder="Nouveau mot de passe" name="password" />
 			</div>
 		</div>
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
 				<span class="uk-form-icon" uk-icon="icon: lock"></span>
-				<input type="password" class="uk-input" placeholder="Confirmation du mot de passe" />
+				<input type="password" class="uk-input" placeholder="Confirmation du mot de passe" name="confirmation" />
 			</div>
 		</div>
 		<div class="uk-margin">
+			<input type="hidden" name="hash" value="<%= (typeof hash != 'undefined')?hash:'' %>" />
 			<input type="submit" class="uk-input uk-button-primary" value="Définir ce mot de passe" />
 		</div>
 	</form>

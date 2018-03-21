@@ -8,25 +8,25 @@
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
 				<span class="uk-form-icon" uk-icon="icon: info"></span>
-				<input type="text" class="uk-input" name="name" autocomplete="family-name" placeholder="Entre ton nom" />
+				<input type="text" class="uk-input" name="name" autocomplete="family-name" placeholder="Entre ton nom" value="<%= (typeof name != 'undefined')?name:'' %>"/>
 			</div>
 		</div>
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
 				<span class="uk-form-icon" uk-icon="icon: info"></span>
-				<input type="text" class="uk-input" name="firstname" autocomplete="given-name" placeholder="Ton prénom" />
+				<input type="text" class="uk-input" name="firstname" autocomplete="given-name" placeholder="Ton prénom" value="<%= (typeof firstname != 'undefined')?firstname:'' %>"/>
 			</div>
 		</div>
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
 				<span class="uk-form-icon" uk-icon="icon: user"></span>
-				<input type="text" class="uk-input" name="username" autocomplete="username" placeholder="Choisi un pseudo" />
+				<input type="text" class="uk-input" name="username" autocomplete="username" placeholder="Choisi un pseudo" value="<%= (typeof username != 'undefined')?username:'' %>"/>
 			</div>
 		</div>
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
 				<span class="uk-form-icon" uk-icon="icon: mail"></span>
-				<input type="email" class="uk-input" placeholder="Entre ton adresse email" name="email" autocomplete="email" />
+				<input type="email" class="uk-input" placeholder="Entre ton adresse email" name="email" autocomplete="email" value="<%= (typeof email != 'undefined')?email:'' %>" />
 			</div>
 		</div>
 		<div class="uk-margin">
@@ -43,8 +43,8 @@
 		</div>
 		<div class="uk-margin">
 			<label>Je suis : </label>
-			<input type="radio" name="gender" class="uk-radio" value="0" /> Un homme
-			<input type="radio" name="gender" class="uk-radio" value="1" /> Une femme
+			<input type="radio" name="gender" id="homme" class="uk-radio" value="0" <%= (typeof gender != 'undefined' && gender == '0')?'checked':'' %> /> <label for="homme">Un homme</label>
+			<input type="radio" name="gender" id="femme" class="uk-radio" value="1" <%= (typeof gender != 'undefined' && gender == '1')?'checked':'' %> /> <label for="femme">Une femme</label>
 		</div>
 		<div class="uk-margin">
 			<div class="uk-inline uk-width-1-1">
