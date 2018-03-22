@@ -1,42 +1,153 @@
 <% include ../partials/header %>
+<script>
+const results = [];
+<% for (let i = 0; i < users.length;i++) { %>
+	results.push(<%- JSON.stringify(users[i]) %>);
+<% } %>
+
+dispatch(results);
+let filtered = results;
+function sortByAge() {
+	filtered.sort(function (a, b) {
+		if (a.age > b.age) {
+			return true;
+		} else {
+			return false;
+		}
+	});
+	dispatch(filtered);
+}
+
+
+function sortByPop() {
+	filtered.sort(function (a, b) {
+		if (a.pop < b.pop) {
+			return true;
+		} else {
+			return false;
+		}
+	});
+	dispatch(filtered);
+}
+
+function sortByDistance() {
+	filtered.sort(function (a, b) {
+		if (a.distance > b.distance) {
+			return true;
+		} else {
+			return false;
+		}
+	});
+	dispatch(filtered);
+}
+
+function dispatch(data) {
+	$("#results-wrapper").html('');
+	data.forEach(function (e) {
+		const photo = (e.photo1)?'/uploads/'+e.photo1:'/img/people.svg';
+		$("#results-wrapper").append('<div class="uk-width-1-5"><div class="uk-card uk-card-default"><div class="uk-card-media-top">'+
+			'<div style="background-image: url('+photo+'); width: 100%; padding-top: 100%; background-size: cover; background-position: center;"></div></div>'+
+			'<div class="uk-card-body"><h3 class="uk-card-title">'+e.username+' <span class="uk-badge">'+e.pop+'</span></h3><p>'+((e.gender == '0')?'Homme ':'')+((e.gender == '1')?'Femme ':'')+((e.age != null)?e.age+' ans':'')+'</p><p>'+e.distance+' km</p></div><div class="uk-card-footer"><a href="/user/'+e.id+'">Voir le profil</a></div></div></div>');
+	});
+}
+
+function filter() {
+	const ageMin = ($('input[name="ageMin"]').val())?$('input[name="ageMin"]').val():-1000000000;
+	const ageMax = ($('input[name="ageMax"]').val())?$('input[name="ageMax"]').val():1000000000;
+	const popMin = ($('input[name="popMin"]').val())?$('input[name="popMin"]').val():-1000000000;
+	const popMax = ($('input[name="popMax"]').val())?$('input[name="popMax"]').val():1000000000;
+	const range = ($('input[name="range"]').val())?$('input[name="range"]').val():1000000000;
+	const tags = ($('input[name="tags"]').val())?$('input[name="tags"]').val():[];
+	console.log(ageMin, ageMax, popMin, popMax);
+	filtered = results.filter(function (e) {
+		if (e.age >= ageMin && e.age <= ageMax && e.pop >= popMin && e.pop <= popMax && e.distance <= range) {
+			return true;
+		} else {
+			return false;
+		}
+	});
+	const ref = JSON.parse(tags);
+	if (tags.length > 0) {
+		filtered = results.filter(function (e) {
+			const ref = JSON.parse(tags);
+			if (ref.length == 0) {
+				return true;
+			}
+			const toCheck = JSON.parse(e.tags);
+			for(var i in ref) {
+				console.log(ref[i]);
+				for (var j in toCheck) {
+					console.log(toCheck[j]);
+					if (ref[i] == toCheck[j]) {
+						return true;
+					}
+				}
+			}
+			return false;
+		});
+	}
+	dispatch(filtered);
+}
+
+function updateRange() {
+	const val = $('input[name="range"]').val();
+	$("#rangeIndice").html(val);
+}
+
+</script>
 <div class="uk-container uk-container-large uk-text-center">
 	<h1 class="uk-text-center uk-margin">Profils proposés</h1>
 	<div class="uk-grid">
 		<div class="uk-width-1-2@s uk-width-1-4@m">
+			<h2>Trier les résultats</h2>
+			<button class="uk-button uk-button-default uk-button-small uk-margin-small" onclick="sortByAge()" >Par âge</button>
+			<button class="uk-button uk-button-default uk-button-small uk-margin-small" onclick="sortByDistance()" >Par proximité</button>
+			<button class="uk-button uk-button-default uk-button-small uk-margin-small" onclick="sortByAge()" >Par centres d'intéret</button>
+			<button class="uk-button uk-button-default uk-button-small uk-margin-small" onclick="sortByPop()" >Par popularité</button>
 			<h2>Filtrer les résultats</h2>
-			<form class="uk-grid" method="post" action="/user">
+			<div class="uk-grid" method="post" action="/user">
 				<div class="uk-width-1-2">
 					<label>Âge min</label>
 					<input type="number" class="uk-input" min="0" name="ageMin" />
 				</div>
-				<div class="uk-width-1-2">
+				<div class="uk-width-1-2 uk-margin-bottom">
 					<label>Âge max</label>
 					<input type="number" class="uk-input" name="ageMax" />
 				</div>
-				<div class="uk-width-1-2">
+				<div class="uk-width-1-2 uk-margin-bottom">
 					<label>Popularité min</label>
 					<input type="number" class="uk-input" min="0" name="popMin" />
 				</div>
-				<div class="uk-width-1-2">
+				<div class="uk-width-1-2 uk-margin-bottom">
 					<label>Popularité max</label>
 					<input type="number" class="uk-input" name="popMax" />
 				</div>
-				<div class="uk-width-1">
-					<label>Ville</label>
-					<input type="text" class="uk-input" />
+				<div class="uk-width-1 uk-margin-bottom">
+					<label>Distance en km : <span id="rangeIndice">1000</span></label>
+					<input type="range" min="0" max="1000" step="10" value="1000" class="uk-range uk-margin" name="range" onchange="updateRange()" />
 				</div>
-				<div class="uk-width-1">
-					<label>Dans un rayon de</label>
-					<input type="range" class="uk-range" />
+				<div class="uk-width-1-2">
+					<label>Tags d'intérêts<label>
+					<input type="text" list="tags" placeholder="Ajouter un tag..." class="uk-input" onkeypress="return checkTag(event)" />
+					<datalist id="tags">
+						<% for (var i = 0; i < tags.length;i++) { %>
+							<option value="<%= tags[i].tag %>">
+						<% } %>
+					</datalist>
+				</div>
+				<div class="uk-width-1-2">
+					<input type="hidden" value="[]" id="tagvalue" name="tags" />
+					<ul id="taglist">
+					</ul>
 				</div>
 				<div class="uk-width-1 uk-margin">
-					<input type="submit" class="uk-button uk-button-primary" value="Filtrer" />
+					<button class="uk-button uk-button-primary" onclick="filter()" >Filrer</button>
 				</div>
-			</form>
+			</div>
 		</div>
-		<div class="uk-width-1-2@s uk-width-3-4@m uk-grid uk-grid-match" uk-grid>
+		<div class="uk-width-1-2@s uk-width-3-4@m uk-grid uk-grid-match" uk-grid id="results-wrapper">
 			<% for (let i = 0; i < users.length;i++) { %>
-				<div class="uk-width-1-4">
+				<div class="uk-width-1-5">
 					<div class="uk-card uk-card-default">
 						<div class="uk-card-media-top">
 							<% if (users[i].photo1)  { %>
@@ -45,7 +156,7 @@
 							<% } else { %>
 								<img src="/img/people.svg" alt="profile picture">
 							<% } %>
-							<span class="uk-position-absolute uk-overlay" style="left: 0%; top: 0%; color: #8BC34A; font-size: 2em; padding: 0; margin: 5px; line-height: 1em; display: none;" data-onid="<%= users[i].id %>" href="#">◉</span>
+							<span class="uk-position-absolute uk-overlay" style="left: 0%; top: 0%; color: #8BC34A; font-size: 2em; padding: 0; margin: 5px; line-height: 1em; display: none;" href="#">◉</span>
 						</div>
 						<div class="uk-card-body">
 							<h3 class="uk-card-title"><%= users[i].username %> <span class="uk-badge"><%= users[i].pop %></span></h3>
@@ -53,6 +164,9 @@
 								<%= (users[i].gender == '0') ? 'Homme' : '' %>
 								<%= (users[i].gender == '1') ? 'Femme' : '' %>
 								<%= (users[i].age != null) ? users[i].age+' ans' : '' %>
+							</p>
+							<p>
+								<%= users[i].distance %> km
 							</p>
 						</div>
 						<div class="uk-card-footer">
@@ -64,13 +178,4 @@
 		</div>
 	</div>
 </div>
-<script>
-socket.on('login', (user) => {
-	$('[data-onid='+user.id+']').show();
-})
-
-socket.on('logout', (user) => {
-	$('[data-onid='+user.id+']').hide();
-})
-</script>
 <% include ../partials/footer %>

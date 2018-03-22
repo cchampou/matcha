@@ -21,6 +21,10 @@
 			userId : <%= userId %>
 		});
 	<% } %>
+	socket.on('message', (opts) => {
+		const current = $("#msgcounter").html();
+		$("#msgcounter").html(parseInt(current) + 1);
+	});
 </script>
 <nav class="uk-navbar-container uk-navbar uk-navbar-transparent" uk-navbar>
 	<div class="uk-navbar-left uk-margin-large-left">
@@ -36,7 +40,7 @@
 					<a href="/user" uk-icon="icon: world" >Explore&nbsp;&nbsp;</a>
 				</li>
 				<li>
-					<a href="/chat" uk-icon="icon: comment" >Chat&nbsp;<span class="uk-badge"><%= newmessages.length %></span>&nbsp;</a>
+					<a href="/chat" uk-icon="icon: comment" >Chat&nbsp;<span class="uk-badge" id="msgcounter"><%= newmessages.length %></span>&nbsp;</a>
 				</li>
 				<li>
 					<a href="/user/<%= userId %>" uk-icon="icon: user" >Profile&nbsp;&nbsp;</a>

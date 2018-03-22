@@ -1,5 +1,7 @@
 
 const ejs = require('ejs');
+const fetch = require('node-fetch');
+
 const bcrypt = require('bcrypt');
 
 const database = require('../config/database.js');
@@ -93,21 +95,44 @@ exports.get = (id) => {
 	});
 }
 
-exports.getAll = (exclude) => {
+exports.getAll = (me) => {
 	return new Promise((resolve, reject) => {
-		console.log("Starting user listing");
-		db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id != ?", [exclude], (err, data) => {
+		db.query("SELECT location FROM users WHERE id = ?", [me], (err, mydata) => {
 			if (err) {
 				reject(err);
 			} else {
-				console.log("User listed successfully");
-				resolve(data);
+				db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id != ?", [me], async (err, data) => {
+					if (err) {
+						reject(err);
+					} else {
+						const limit = data.length;
+						let i = 0;
+						while (i < limit) {
+							try {
+								const res = await fetch('https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins='+mydata[0].location+'&destinations='+data[i].location+'&key=AIzaSyAQQdupWzfhiBYyCjdiG5RJfN1r04mhv9w');
+								const parsed = await res.json();
+								if (parsed && parsed.rows) {
+									const distance = parsed.rows[0].elements[0].distance.value / 1000;
+									data[i].distance = Math.floor(distance);
+									if (i === limit - 1) {
+										resolve(data);
+									}
+								} else {
+									data[i].distance = 0;
+								}
+							} catch (e) {
+								reject(e);
+							}
+							i++;
+						}
+					}
+				})
 			}
 		})
 	});
 }
 
-exports.getFiltered = (exclude, ageMin, ageMax, popMin, popMax, tags) => {
+exports.getFiltered = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 	return new Promise((resolve, reject) => {
 		console.log("Starting user listing");
 		if (!ageMin) {
@@ -117,37 +142,109 @@ exports.getFiltered = (exclude, ageMin, ageMax, popMin, popMax, tags) => {
 			ageMax = 1000;
 		}
 		if (!popMin) {
-			popMin = 0;
+			popMin = -100000;
 		}
 		if (!popMax) {
 			popMax = 1000000;
 		}
-		db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id != ? AND age >= ? AND age <= ? AND pop >= ? AND pop <= ? ", [exclude, ageMin, ageMax, popMin, popMax], (err, data) => {
+		db.query("SELECT location FROM users WHERE id = ?", [me], (err, mydata) => {
 			if (err) {
 				reject(err);
 			} else {
-				console.log("User listed successfully");
-				resolve(data);
+				db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id != ? AND age >= ? AND age <= ? AND pop >= ? AND pop <= ? ", [me, ageMin, ageMax, popMin, popMax], async (err, data) => {
+					if (err) {
+						reject(err);
+					} else {
+						const limit = data.length;
+						let i = 0;
+						while (i < limit) {
+							try {
+								const res = await fetch('https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins='+mydata[0].location+'&destinations='+data[i].location+'&key=AIzaSyAQQdupWzfhiBYyCjdiG5RJfN1r04mhv9w');
+								const parsed = await res.json();
+								if (parsed && parsed.rows ) {
+									const distance = parsed.rows[0].elements[0].distance.value / 1000;
+									data[i].distance = Math.floor(distance);
+									if (i === limit - 1) {
+										data = data.filter((one) => {
+											if (one.distance <= range) {
+												return true;
+											} else {
+												return false;
+											}
+										})
+										data = data.filter((one) => {
+											const ref = JSON.parse(tags);
+											if (ref.length == 0) {
+												return true;
+											}
+											const toCheck = JSON.parse(one.tags);
+											for(var i in ref) {
+												console.log(ref[i]);
+												for (var j in toCheck) {
+													console.log(toCheck[j]);
+													if (ref[i] == toCheck[j]) {
+														return true;
+													}
+												}
+											}
+											return false;
+										});
+										resolve(data);
+									}
+								} else {
+									data[i].distance = 0;
+								}
+							} catch (e) {
+								reject(e);
+							}
+							i++;
+						}
+					}
+				})
 			}
-		})
+		});
 	});
 }
 
-exports.update = (id, firstname, name, username, email, gender, interest, age, location, bio, photo1, photo2, photo3, photo4, photo5, tags) => {
+exports.update = (id, firstname, name, username, password, confirmation, email, gender, interest, age, location, bio, photo1, photo2, photo3, photo4, photo5, tags) => {
 	return new Promise(async (resolve, reject) => {
-		console.log("Starting user update with id "+id);
-		const toUpdate = {
-			name: name,
-			firstname: firstname,
-			email: email,
-			username: username,
-			gender: gender,
-			interest: interest,
-			age: age,
-			location: location,
-			bio: bio,
-			tags: tags
-		};
+		let toUpdate = {};
+		if (password && confirmation) {
+			const regexp = /[a-z]+[1-9]+/i;
+			if (password.length < 8 || !regexp.test(password)) {
+				reject("Le mot de passe doit contenir au moins 8 caracteres, des chiffres et des lettres");
+			}
+			if (password != confirmation) {
+				reject("Le mot de passe et sa confirmation ne correspondent pas");
+			}
+			const hash = await bcrypt.hash(password, 10);
+			toUpdate = {
+				name: name,
+				firstname: firstname,
+				email: email,
+				username: username,
+				hash: hash,
+				gender: gender,
+				interest: interest,
+				age: age,
+				location: location,
+				bio: bio,
+				tags: tags
+			};
+		} else {
+			toUpdate = {
+				name: name,
+				firstname: firstname,
+				email: email,
+				username: username,
+				gender: gender,
+				interest: interest,
+				age: age,
+				location: location,
+				bio: bio,
+				tags: tags
+			};
+		}
 		if (photo1) {
 			toUpdate.photo1 = photo1;
 		}

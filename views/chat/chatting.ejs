@@ -40,10 +40,14 @@ $(document).ready(() => {
 });
 
 socket.on('message', (opts) => {
-	$("#canvas").append('<div class="uk-grid uk-flex-left uk-margin-left uk-margin-right"><p class="uk-card uk-card-default uk-padding-small uk-width-4-5">'+opts.content+'</p></div>');
-	$('#canvas').stop().animate({
-		scrollTop: $('#canvas')[0].scrollHeight
-	}, 250);
+	if (opts.from == <%= user.id %>) {
+		const current = $("#msgcounter").html();
+		$("#msgcounter").html(parseInt(current) - 1);
+		$("#canvas").append('<div class="uk-grid uk-flex-left uk-margin-left uk-margin-right"><p class="uk-card uk-card-default uk-padding-small uk-width-4-5">'+opts.content+'</p></div>');
+		$('#canvas').stop().animate({
+			scrollTop: $('#canvas')[0].scrollHeight
+		}, 250);
+	}
 });
 
 function sendMessage(e)

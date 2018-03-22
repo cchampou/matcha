@@ -17,6 +17,7 @@ router.get('/', async (req, res) => {
 	data.userId = req.session.userId;
 	try {
 		data.users = await userController.getAll(req, res);
+		data.tags = await tagModel.get();
 		data.newmessages = await messageModel.getUnread(req.session.userId);
 		data.notifs = await notifModel.get(req.session.userId);
 		res.render('user/list', data);
@@ -33,6 +34,7 @@ router.get('/search', async (req, res) => {
 	}
 	data.userId = req.session.userId;
 	try {
+		data.tags = await tagModel.get();
 		data.newmessages = await messageModel.getUnread(req.session.userId);
 		data.notifs = await notifModel.get(req.session.userId);
 		res.render('user/search', data);
@@ -49,6 +51,7 @@ router.post('/', async (req, res) => {
 	}
 	data.userId = req.session.userId;
 	try {
+		data.tags = await tagModel.get();
 		data.users = await userController.getFiltered(req,res);
 		data.newmessages = await messageModel.getUnread(req.session.userId);
 		data.notifs = await notifModel.get(req.session.userId);

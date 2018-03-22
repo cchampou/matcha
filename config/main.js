@@ -1,5 +1,5 @@
 
 module.exports = {
 	host: 'http://localhost:8080',
-	myip: '81.249.149.41'
+	myip: '62.210.32.80'
 }

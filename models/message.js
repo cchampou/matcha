@@ -46,8 +46,7 @@ exports.create = (from, to, content, seen) => {
 		db.query("INSERT INTO messages SET ?", {
 			owner : from,
 			target : to,
-			content : content,
-			seen : seen
+			content : content
 		}, (err, data) => {
 			if (err) {
 				console.log(err);

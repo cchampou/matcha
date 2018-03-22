@@ -77,12 +77,17 @@ module.exports = {
 
 	update: (req, res) => {
 		return new Promise(async (resolve, reject) => {
+			if (req.body.password && !req.body.confirmation) {
+				reject('Veuillez confirmer votre nouveau mot de passe');
+			}
 			try {
 				await userModel.update(
 					req.session.userId,
 					req.body.firstname,
 					req.body.name,
 					req.body.username,
+					req.body.password,
+					req.body.confirmation,
 					req.body.email,
 					req.body.gender,
 					req.body.interest,
@@ -117,8 +122,9 @@ module.exports = {
 
 	getFiltered: (req, res) => {
 		return new Promise(async (resolve, reject) => {
+			console.log(req.body.range);
 			try {
-				const data = await userModel.getFiltered(req.session.userId, req.body.ageMin, req.body.ageMax, req.body.popMin, req.body.popMax);
+				const data = await userModel.getFiltered(req.session.userId, req.body.ageMin, req.body.ageMax, req.body.popMin, req.body.popMax, req.body.tags, req.body.range);
 				resolve(data);
 			} catch(e) {
 				reject(e);

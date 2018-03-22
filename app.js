@@ -83,7 +83,9 @@ io.on('connection', (socket) => {
 		if (online[opts.to]) {
 			await messageModel.create(opts.from, opts.to, opts.content, 1);
 			io.sockets.to(online[opts.to]).emit('message', {
-				content: opts.content
+				content: opts.content,
+				from: opts.from,
+				to: opts.to
 			});
 		} else {
 			await messageModel.create(opts.from, opts.to, opts.content, 0);

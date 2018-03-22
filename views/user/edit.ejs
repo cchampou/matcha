@@ -19,22 +19,26 @@
 			<label>Email</label>
 			<input type="text" name="email" placeholder="Adresse email..." class="uk-input" value="<%= user.email %>" />
 		</div>
-		<div class="uk-width-1-2 uk-text-center">
-			<label>Je suis : </label>
-			<input type="radio" name="gender" class="uk-radio" value="0" <%= (user.gender == '0') ? 'checked' : '' %> /> Un homme
-			<input type="radio" name="gender" class="uk-radio" value="1" <%= (user.gender == '1') ? 'checked' : '' %> /> Une femme
+		<div class="uk-width-1-2">
+			<label>Nouveau mot de passe</label>
+			<input type="password" name="password" placeholder="Nouveau mot de passe..." class="uk-input uk-margin-bottom" />
+			<label>Confirmation du nouveau mot de passe</label>
+			<input type="password" name="confirmation" placeholder="Confirmation du nouveau mot de passe..." class="uk-input" />
 		</div>
 		<div class="uk-width-1-2">
+			<label>Je suis : </label><br />
+			<input type="radio" name="gender" class="uk-radio" value="0" <%= (user.gender == '0') ? 'checked' : '' %> /> Un homme<br />
+			<input type="radio" name="gender" class="uk-radio" value="1" <%= (user.gender == '1') ? 'checked' : '' %> /> Une femme<br />
 			<label>Interessé par</label><br />
 			<input type="radio" class="uk-radio" name="interest" value="0" <%= (user.interest == '0') ? 'checked' : '' %>> Hommes<br />
 			<input type="radio" class="uk-radio" name="interest" value="1" <%= (user.interest == '1') ? 'checked' : '' %>> Femmes<br />
 			<input type="radio" class="uk-radio" name="interest" value="2" <%= (user.interest == '2') ? 'checked' : '' %>> Femmes & Hommes
 		</div>
-		<div class="uk-width-1-4">
+		<div class="uk-width-1-2">
 			<label>Âge</label>
 			<input type="number" name="age" placeholder="Âge..." value="<%= user.age %>" class="uk-input" />
 		</div>
-		<div class="uk-width-1-4">
+		<div class="uk-width-1-2">
 			<label>Ville</label>
 			<input type="text" name="location" placeholder="Ville..." value="<%= user.location %>" class="uk-input" />
 		</div>

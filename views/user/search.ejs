@@ -1,33 +1,51 @@
 <% include ../partials/header %>
+<script>
+
+function updateRange() {
+	const val = $('input[name="range"]').val();
+	$("#rangeIndice").html(val);
+}
+
+</script>
 <div class="uk-container uk-container-small">
 	<h1 class="uk-text-center uk-margin">Rechercher</h1>
 		<form class="uk-grid" method="post" action="/user">
 			<div class="uk-width-1-2">
 				<label>Âge min</label>
-				<input type="number" class="uk-input" min="0" name="ageMin" />
+				<input type="number" class="uk-input uk-margin-bottom" min="0" name="ageMin" />
 			</div>
 			<div class="uk-width-1-2">
 				<label>Âge max</label>
-				<input type="number" class="uk-input" name="ageMax" />
+				<input type="number" class="uk-input uk-margin-bottom" name="ageMax" />
 			</div>
 			<div class="uk-width-1-2">
 				<label>Popularité min</label>
-				<input type="number" class="uk-input" min="0" name="popMin" />
+				<input type="number" class="uk-input uk-margin-bottom" min="0" name="popMin" />
 			</div>
 			<div class="uk-width-1-2">
 				<label>Popularité max</label>
-				<input type="number" class="uk-input" name="popMax" />
+				<input type="number" class="uk-input uk-margin-bottom" name="popMax" />
 			</div>
-			<div class="uk-width-1">
-				<label>Ville</label>
-				<input type="text" class="uk-input" />
+			<div class="uk-width-1-2">
+				<label>Dans un rayon de <span id="rangeIndice">1000</span> km</label>
+				<input type="range" class="uk-range uk-margin-bottom" name="range" min="0" max="1000" value="1000" step="10" onchange="updateRange()" />
 			</div>
-			<div class="uk-width-1">
-				<label>Dans un rayon de</label>
-				<input type="range" class="uk-range" />
+			<div class="uk-width-1-2">
+				<label>Tags d'intérêts<label>
+				<input type="text" list="tags" placeholder="Ajouter un tag..." class="uk-input" onkeypress="return checkTag(event)" />
+				<datalist id="tags">
+					<% for (var i = 0; i < tags.length;i++) { %>
+						<option value="<%= tags[i].tag %>">
+					<% } %>
+				</datalist>
 			</div>
-			<div class="uk-width-1 uk-margin">
-				<input type="submit" class="uk-button uk-button-primary" value="Filtrer" />
+			<div class="uk-width-1-2">
+				<input type="hidden" value="[]" id="tagvalue" name="tags" />
+				<ul id="taglist">
+				</ul>
+			</div>
+			<div class="uk-width-1 uk-margin uk-text-center">
+				<input type="submit" class="uk-button uk-button-primary" value="Rechercher" />
 			</div>
 		</form>
 	</div>
