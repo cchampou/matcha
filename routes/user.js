@@ -10,6 +10,16 @@ const multer = require('multer');
 const upload = multer({ dest: 'public/uploads/' });
 const config = require('../config/main.js');
 
+router.get('/feed', async (req, res) => {
+	try {
+		await userModel.feed();
+		res.end();
+	} catch(e) {
+		console.log(e);
+		res.redirect(302, '/');
+	}
+});
+
 router.get('/', async (req, res) => {
 	const data = {};
 	if (!req.session.userId) {

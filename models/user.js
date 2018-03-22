@@ -11,6 +11,42 @@ const mail = require('../config/mail.js');
 const mainConfig = require('../config/main.js');
 const popModel = require('../models/pop.js')
 
+exports.feed = () => {
+	return new Promise((resolve, reject) => {
+		db.query("SELECT * FROM tags", (err, tags) => {
+			if (err) {
+				return reject(err);
+			} else {
+				db.query("SELECT firstname, name, username, email, city, age, gender, password FROM fakenames LIMIT 500", (err, toLoad) => {
+					if (err) {
+						return reject(err);
+					} else {
+						toLoad = toLoad.map((e) => {
+							const tag1 = Math.floor(Math.random() * 10);
+							const tag2 = Math.floor(Math.random() * 10);
+							let pop = Math.floor((Math.random() * 100));
+							pop = pop - pop % 5;
+							const custags = [];
+							custags.push(tags[tag1].tag);
+							custags.push(tags[tag2].tag);
+							const gender = (e.gender == "male")?0:1;
+							const photo = (e.gender == "male")?'3b230cbab721c0f37a5f4c4f93bc77fb':'f07e74abf1945561bd11faec4666f108';
+							return [e.name, e.firstname, e.username, e.email, e.city, gender, e.age, e.password, JSON.stringify(custags), photo, pop];
+						})
+						db.query("INSERT INTO users (name, firstname, username, email, location, gender, age, hash, tags, photo1, pop) VALUES ?", [toLoad], (err, res) => {
+							if (err) {
+								return reject(err);
+							} else {
+								resolve();
+							}
+						});
+					}
+				})
+			}
+		});
+	})
+}
+
 exports.signUp = (fname, name, uname, email, pass, conf, gender) => {
 	return new Promise(async (resolve, reject) => {
 		const regexp = /[a-z]+[1-9]+/i;
@@ -128,7 +164,8 @@ exports.getAll = (me) => {
 							if (err) {
 								reject(err);
 							} else {
-
+								data.splice(100);
+								
 								// On vire les bloqués
 
 								data = data.filter((e) => {
@@ -187,7 +224,7 @@ exports.getAll = (me) => {
 													// Distance first !
 
 													data.sort((a, b) => {
-														if (a.distance < b.distance) {
+														if (a.distance > b.distance) {
 															return true;
 														} else {
 															return false;
@@ -197,7 +234,7 @@ exports.getAll = (me) => {
 													// Interets ensuite
 
 													data.sort((a, b) => {
-														if (a.score < b.score) {
+														if (a.score > b.score) {
 															return true;
 														} else {
 															return false;
@@ -211,7 +248,7 @@ exports.getAll = (me) => {
 															return false;
 														}
 													})
-
+													data.splice(10);
 													resolve(data);
 												}
 											} else {
@@ -266,7 +303,7 @@ exports.getFiltered = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 							if (err) {
 								reject(err);
 							} else {
-
+								data.splice(100);
 								// On vire les bloqués
 
 								data = data.filter((e) => {
@@ -314,7 +351,7 @@ exports.getFiltered = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 									try {
 										const res = await fetch('https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins='+mydata[0].location+'&destinations='+data[i].location+'&key=AIzaSyAQQdupWzfhiBYyCjdiG5RJfN1r04mhv9w');
 										const parsed = await res.json();
-										if (parsed && parsed.rows ) {
+										if (parsed && parsed.rows && parsed.rows[0] ) {
 											const distance = parsed.rows[0].elements[0].distance.value / 1000;
 											data[i].distance = Math.floor(distance);
 											if (i === limit - 1) {
@@ -347,7 +384,7 @@ exports.getFiltered = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 												// Distance first !
 
 												data.sort((a, b) => {
-													if (a.distance < b.distance) {
+													if (a.distance > b.distance) {
 														return true;
 													} else {
 														return false;
@@ -357,7 +394,7 @@ exports.getFiltered = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 												// Interets ensuite
 
 												data.sort((a, b) => {
-													if (a.score < b.score) {
+													if (a.score > b.score) {
 														return true;
 													} else {
 														return false;
@@ -371,9 +408,8 @@ exports.getFiltered = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 														return false;
 													}
 												})
-
+												data.splice(10);
 												resolve(data);
-
 											}
 										} else {
 											data[i].distance = 0;

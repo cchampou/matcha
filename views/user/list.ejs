@@ -9,11 +9,7 @@ dispatch(results);
 let filtered = results;
 function sortByAge() {
 	filtered.sort(function (a, b) {
-		if (a.age > b.age) {
-			return true;
-		} else {
-			return false;
-		}
+		return (a.age - b.age);
 	});
 	dispatch(filtered);
 }
@@ -21,34 +17,24 @@ function sortByAge() {
 
 function sortByPop() {
 	filtered.sort(function (a, b) {
-		if (a.pop < b.pop) {
-			return true;
-		} else {
-			return false;
-		}
+		return (b.pop - a.pop);
 	});
 	dispatch(filtered);
 }
 
 function sortByDistance() {
 	filtered.sort(function (a, b) {
-		if (a.distance > b.distance) {
-			return true;
-		} else {
-			return false;
-		}
+		return (a.distance - b.distance);
 	});
 	dispatch(filtered);
 }
 
 function sortByInterest() {
+	console.log(filtered);
 	filtered.sort(function (a, b) {
-		if (a.score < b.score) {
-			return true;
-		} else {
-			return false;
-		}
+		return (b.score - a.score);
 	});
+	console.log(filtered);
 	dispatch(filtered);
 }
 
@@ -58,7 +44,7 @@ function dispatch(data) {
 		const photo = (e.photo1)?'/uploads/'+e.photo1:'/img/people.svg';
 		$("#results-wrapper").append('<div class="uk-width-1-5"><div class="uk-card uk-card-default"><div class="uk-card-media-top">'+
 			'<div style="background-image: url('+photo+'); width: 100%; padding-top: 100%; background-size: cover; background-position: center;"></div></div>'+
-			'<div class="uk-card-body"><h3 class="uk-card-title">'+e.username+' <span class="uk-badge">'+e.pop+'</span></h3><p>'+((e.gender == '0')?'Homme ':'')+((e.gender == '1')?'Femme ':'')+((e.age != null)?e.age+' ans':'')+'</p><p>'+e.distance+' km</p></div><div class="uk-card-footer"><a href="/user/'+e.id+'">Voir le profil</a></div></div></div>');
+			'<div class="uk-card-body"><h3 class="uk-card-title">'+e.firstname+' <span class="uk-badge">'+e.pop+'</span></h3><p>'+((e.gender == '0')?'Homme ':'')+((e.gender == '1')?'Femme ':'')+((e.age != null)?e.age+' ans':'')+'</p><p>'+e.distance+' km</p></div><div class="uk-card-footer"><a href="/user/'+e.id+'">Voir le profil</a></div></div></div>');
 	});
 }
 
@@ -171,7 +157,7 @@ function updateRange() {
 							<span class="uk-position-absolute uk-overlay" style="left: 0%; top: 0%; color: #8BC34A; font-size: 2em; padding: 0; margin: 5px; line-height: 1em; display: none;" href="#">◉</span>
 						</div>
 						<div class="uk-card-body">
-							<h3 class="uk-card-title"><%= users[i].username %> <span class="uk-badge"><%= users[i].pop %></span></h3>
+							<h3 class="uk-card-title"><%= users[i].firstname %> <span class="uk-badge"><%= users[i].pop %></span></h3>
 							<p>
 								<%= (users[i].gender == '0') ? 'Homme' : '' %>
 								<%= (users[i].gender == '1') ? 'Femme' : '' %>
