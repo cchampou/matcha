@@ -27,6 +27,7 @@ exports.create = async (from, to) => {
 
 exports.delete = (from, to) => {
 	return new Promise(async (resolve, reject) => {
+		await notifModel.create(from, to, 3);
 		db.query('DELETE FROM likes WHERE owner = ? AND target = ?', [from, to], async (err, data) => {
 			if (err) {
 				reject(err);

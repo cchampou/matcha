@@ -25,6 +25,24 @@
 		const current = $("#msgcounter").html();
 		$("#msgcounter").html(parseInt(current) + 1);
 	});
+	socket.on('notif', (opts) => {
+		const current = $("#notifcounter").html();
+		$("#notifcounter").html(parseInt(current) + 1);
+		let text = "";
+		if (opts.type == 0) {
+			text = '<li class="uk-active"><a href="#">'+opts.from.firstname+' a visité ton profil</a></li>';
+		}
+		if (opts.type == 1) {
+			text = '<li class="uk-active"><a href="#">'+opts.from.firstname+' te kiff !</a></li>';
+		}
+		if (opts.type == 2) {
+			text = '<li class="uk-active"><a href="#">'+opts.from.firstname+' te kiff aussi ! MATCH !</a></li>';
+		}
+		if (opts.type == 3) {
+			text = '<li class="uk-active"><a href="#">'+opts.from.firstname+' te kiff plus ...</a></li>';
+		}
+		$("#notifdrop").prepend(text);
+	});
 </script>
 <nav class="uk-navbar-container uk-navbar uk-navbar-transparent" uk-navbar>
 	<div class="uk-navbar-left uk-margin-large-left">
@@ -46,9 +64,9 @@
 					<a href="/user/<%= userId %>" uk-icon="icon: user" >Profile&nbsp;&nbsp;</a>
 				</li>
 				<li class="uk-parent">
-					<a href="#" uk-icon="icon: bell"><span class="uk-badge"><%= notifs.length %></span></a>
-					<div class="uk-navbar-dropdown uk-navbar-dropdown-bottom-left">
-						<ul class="uk-nav uk-navbar-dropdown-nav">
+					<a href="#" uk-icon="icon: bell"><span class="uk-badge" id="notifcounter"><%= notifs.length %></span></a>
+					<div class="uk-navbar-dropdown uk-navbar-dropdown-bottom-left" style="max-height: 25em; overflow-y: auto;">
+						<ul class="uk-nav uk-navbar-dropdown-nav" id="notifdrop">
 							<% for (let i = 0; i < notifs.length; i++) { %>
 								<li class="uk-active">
 									<a href="#">
@@ -56,6 +74,7 @@
 										<%= notifs[i].type == 0 ? ' a visité ton profil' : '' %>
 										<%= notifs[i].type == 1 ? ' te kiff !' : '' %>
 										<%= notifs[i].type == 2 ? ' te kiff aussi ! MATCH !' : '' %>
+										<%= notifs[i].type == 3 ? ' te kiff plus ...' : '' %>
 									</a></li>
 							<% } %>
 						</ul>

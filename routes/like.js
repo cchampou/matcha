@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const likeModel = require('../models/like');
+const userModel = require('../models/user');
 
 router.get('/create/:id', async (req, res) => {
 	console.log("Like from "+req.session.userId+" to "+req.params.id);

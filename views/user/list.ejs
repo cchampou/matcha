@@ -41,6 +41,17 @@ function sortByDistance() {
 	dispatch(filtered);
 }
 
+function sortByInterest() {
+	filtered.sort(function (a, b) {
+		if (a.score < b.score) {
+			return true;
+		} else {
+			return false;
+		}
+	});
+	dispatch(filtered);
+}
+
 function dispatch(data) {
 	$("#results-wrapper").html('');
 	data.forEach(function (e) {
@@ -102,7 +113,7 @@ function updateRange() {
 			<h2>Trier les résultats</h2>
 			<button class="uk-button uk-button-default uk-button-small uk-margin-small" onclick="sortByAge()" >Par âge</button>
 			<button class="uk-button uk-button-default uk-button-small uk-margin-small" onclick="sortByDistance()" >Par proximité</button>
-			<button class="uk-button uk-button-default uk-button-small uk-margin-small" onclick="sortByAge()" >Par centres d'intéret</button>
+			<button class="uk-button uk-button-default uk-button-small uk-margin-small" onclick="sortByInterest()" >Par centres d'intéret</button>
 			<button class="uk-button uk-button-default uk-button-small uk-margin-small" onclick="sortByPop()" >Par popularité</button>
 			<h2>Filtrer les résultats</h2>
 			<div class="uk-grid" method="post" action="/user">

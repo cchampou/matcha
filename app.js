@@ -7,7 +7,8 @@ const database = require('./config/database.js');
 const db = database.db;
 const notifModel = require('./models/notif.js');
 const messageModel = require('./models/message.js');
-const io = require('socket.io')(http);
+const socketIO = require('./sockets.js').init(http);
+
 
 db.connect();
 
@@ -63,52 +64,6 @@ app.get('/', async (req, res) => {
 	}
 	res.render('home', data);
 });
-
-// Socket.IO
-
-let online = [];
-
-io.on('connection', (socket) => {
-	let me = null;
-	socket.on('login', (user) => {
-		online[user.userId] = socket.id;
-		console.log(online);
-		me = user.userId;
-		io.sockets.emit('login', {
-			id: user.userId
-		});
-	});
-
-	socket.on('message', async (opts) => {
-		if (online[opts.to]) {
-			await messageModel.create(opts.from, opts.to, opts.content, 1);
-			io.sockets.to(online[opts.to]).emit('message', {
-				content: opts.content,
-				from: opts.from,
-				to: opts.to
-			});
-		} else {
-			await messageModel.create(opts.from, opts.to, opts.content, 0);
-		}
-	});
-	online.map((e, id) => {
-		if (e) {
-			socket.emit('login', {
-				id: id
-			});
-		}
-	});
-
-	socket.on('disconnect', () => {
-		if (me) {
-			delete online[me];
-			console.log(online);
-			io.sockets.emit('logout', {
-				id: me
-			});
-		}
-	})
-})
 
 // Démarrage du serveur
 

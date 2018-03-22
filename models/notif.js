@@ -1,6 +1,8 @@
 
 const database = require('../config/database.js');
 const db = database.db;
+const sockets = require('../sockets.js');
+const userModel = require('./user.js');
 
 exports.create = (owner, target, type) => {
 	console.log("Creating notif type "+type+" from "+owner+" to "+target);
@@ -8,11 +10,14 @@ exports.create = (owner, target, type) => {
 		if (owner == target) {
 			return resolve();
 		}
-		db.query("SELECT * FROM notifs WHERE owner = ? AND target = ? AND type = ?", [owner, target, type], (err, data) => {
+		db.query("SELECT * FROM notifs WHERE owner = ? AND target = ? AND type = ?", [owner, target, type], (err, data1) => {
 			if (err) {
 				console.log(err);
 				return reject(err);
-			} else if (!data[0]) {
+			} else {
+				if (data1[0] && type == 0) {
+					return resolve();
+				}
 				db.query("SELECT * FROM notifs WHERE owner = ? AND target = ? AND type = 1", [target, owner], (err, data) => {
 					if (err) {
 						console.log(err);
@@ -24,21 +29,25 @@ exports.create = (owner, target, type) => {
 						owner: owner,
 						target: target,
 						type: type
-					}, (err, data) => {
+					}, async (err, data) => {
 						if (err) {
 							console.log(err);
 							reject(err);
 						} else {
+							const fromUser = await userModel.get(owner);
+							sockets.emitNotif(fromUser, target, type);
 							if (type == 2) {
 								db.query("INSERT INTO notifs SET ?", {
 									owner: target,
 									target: owner,
 									type: type
-								}, (err, data) => {
+								}, async (err, data) => {
 									if (err) {
 										console.log(err);
 										reject(err);
 									} else {
+										const fromUser = await userModel.get(target);
+										sockets.emitNotif(fromUser, owner, type);
 										return resolve();
 									}
 								})
@@ -48,8 +57,6 @@ exports.create = (owner, target, type) => {
 						}
 					})
 				});
-			} else {
-				return resolve();
 			}
 		});
 	});

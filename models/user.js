@@ -97,7 +97,7 @@ exports.get = (id) => {
 
 exports.getAll = (me) => {
 	return new Promise((resolve, reject) => {
-		db.query("SELECT location FROM users WHERE id = ?", [me], (err, mydata) => {
+		db.query("SELECT location, interest, tags FROM users WHERE id = ?", [me], (err, mydata) => {
 			if (err) {
 				reject(err);
 			} else {
@@ -105,6 +105,37 @@ exports.getAll = (me) => {
 					if (err) {
 						reject(err);
 					} else {
+
+						// Tri des sexes, on dégage ce qui nous interesse pas
+
+						data = data.filter((elem) => {
+							if ((mydata[0].interest == 2 || mydata[0].interest == 1) && elem.gender == 1) {
+								return true;
+							}
+							if ((mydata[0].interest == 2 || mydata[0].interest == 0) && elem.gender == 0) {
+								return true;
+							}
+							return false
+						});
+
+						// On colle un ptit score de matching sur tags
+
+						const mytags = JSON.parse(mydata[0].tags);
+
+						data = data.map((elem) => {
+							let score = 0;
+							const toCheck = JSON.parse(elem.tags);
+							for(var i in mytags) {
+								for (var j in toCheck) {
+									if (mytags[i] == toCheck[j]) {
+										score++;
+									}
+								}
+							}
+							elem.score = score;
+							return elem;
+						});
+
 						const limit = data.length;
 						let i = 0;
 						while (i < limit) {
@@ -115,6 +146,36 @@ exports.getAll = (me) => {
 									const distance = parsed.rows[0].elements[0].distance.value / 1000;
 									data[i].distance = Math.floor(distance);
 									if (i === limit - 1) {
+
+										// On trie !
+										// Distance first !
+
+										data.sort((a, b) => {
+											if (a.distance < b.distance) {
+												return true;
+											} else {
+												return false;
+											}
+										});
+
+										// Interets ensuite
+
+										data.sort((a, b) => {
+											if (a.score < b.score) {
+												return true;
+											} else {
+												return false;
+											}
+										});
+
+										data.sort((a, b) => {
+											if (a.pop < b.pop) {
+												return true;
+											} else {
+												return false;
+											}
+										})
+
 										resolve(data);
 									}
 								} else {
@@ -147,7 +208,7 @@ exports.getFiltered = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 		if (!popMax) {
 			popMax = 1000000;
 		}
-		db.query("SELECT location FROM users WHERE id = ?", [me], (err, mydata) => {
+		db.query("SELECT location, interest, tags FROM users WHERE id = ?", [me], (err, mydata) => {
 			if (err) {
 				reject(err);
 			} else {
@@ -155,6 +216,37 @@ exports.getFiltered = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 					if (err) {
 						reject(err);
 					} else {
+
+						// Tri des sexes, on dégage ce qui nous interesse pas
+
+						data = data.filter((elem) => {
+							if ((mydata[0].interest == 2 || mydata[0].interest == 1) && elem.gender == 1) {
+								return true;
+							}
+							if ((mydata[0].interest == 2 || mydata[0].interest == 0) && elem.gender == 0) {
+								return true;
+							}
+							return false
+						});
+
+						// On colle un ptit score de matching sur tags
+
+						const mytags = JSON.parse(mydata[0].tags);
+
+						data = data.map((elem) => {
+							let score = 0;
+							const toCheck = JSON.parse(elem.tags);
+							for(var i in mytags) {
+								for (var j in toCheck) {
+									if (mytags[i] == toCheck[j]) {
+										score++;
+									}
+								}
+							}
+							elem.score = score;
+							return elem;
+						});
+
 						const limit = data.length;
 						let i = 0;
 						while (i < limit) {
@@ -189,7 +281,38 @@ exports.getFiltered = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 											}
 											return false;
 										});
+
+										// On trie !
+										// Distance first !
+
+										data.sort((a, b) => {
+											if (a.distance < b.distance) {
+												return true;
+											} else {
+												return false;
+											}
+										});
+
+										// Interets ensuite
+
+										data.sort((a, b) => {
+											if (a.score < b.score) {
+												return true;
+											} else {
+												return false;
+											}
+										});
+
+										data.sort((a, b) => {
+											if (a.pop < b.pop) {
+												return true;
+											} else {
+												return false;
+											}
+										})
+
 										resolve(data);
+
 									}
 								} else {
 									data[i].distance = 0;
