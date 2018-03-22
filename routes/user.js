@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch');
 const userController = require('../controllers/user.js');
+const userModel = require('../models/user.js');
 const tagModel = require('../models/tag.js');
 const notifModel = require('../models/notif.js');
 const messageModel = require('../models/message.js');
@@ -23,7 +24,7 @@ router.get('/', async (req, res) => {
 		res.render('user/list', data);
 	} catch(e) {
 		console.log(e);
-		res.redirect(302, '/');
+		res.redirect(302, 'user/edit');
 	}
 });
 
@@ -44,6 +45,20 @@ router.get('/search', async (req, res) => {
 	}
 })
 
+router.get('/fake/:id', async (req, res) => {
+	const data = {};
+	if (!req.session.userId) {
+		res.redirect(302, '/auth/signin');
+	}
+	try {
+		await userModel.fakeToggle(req.session.userId, req.params.id);
+		res.redirect(302, '/user/'+req.params.id);
+	} catch(e) {
+		console.log(e);
+		res.redirect(302, '/');
+	}
+});
+
 router.post('/', async (req, res) => {
 	const data = {};
 	if (!req.session.userId) {
@@ -57,8 +72,7 @@ router.post('/', async (req, res) => {
 		data.notifs = await notifModel.get(req.session.userId);
 		res.render('user/list', data);
 	} catch (e) {
-		console.log(e);
-		res.redirect(302, '/');
+		res.redirect(302, 'user/edit');
 	}
 })
 

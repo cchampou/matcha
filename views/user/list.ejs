@@ -62,7 +62,8 @@ function dispatch(data) {
 	});
 }
 
-function filter() {
+function filter(event) {
+	event.preventDefault();
 	const ageMin = ($('input[name="ageMin"]').val())?$('input[name="ageMin"]').val():-1000000000;
 	const ageMax = ($('input[name="ageMax"]').val())?$('input[name="ageMax"]').val():1000000000;
 	const popMin = ($('input[name="popMin"]').val())?$('input[name="popMin"]').val():-1000000000;
@@ -79,7 +80,7 @@ function filter() {
 	});
 	const ref = JSON.parse(tags);
 	if (tags.length > 0) {
-		filtered = results.filter(function (e) {
+		filtered = filtered.filter(function (e) {
 			const ref = JSON.parse(tags);
 			if (ref.length == 0) {
 				return true;
@@ -116,7 +117,7 @@ function updateRange() {
 			<button class="uk-button uk-button-default uk-button-small uk-margin-small" onclick="sortByInterest()" >Par centres d'intéret</button>
 			<button class="uk-button uk-button-default uk-button-small uk-margin-small" onclick="sortByPop()" >Par popularité</button>
 			<h2>Filtrer les résultats</h2>
-			<div class="uk-grid" method="post" action="/user">
+			<form class="uk-grid" onsubmit="filter(event)">
 				<div class="uk-width-1-2">
 					<label>Âge min</label>
 					<input type="number" class="uk-input" min="0" name="ageMin" />
@@ -152,9 +153,9 @@ function updateRange() {
 					</ul>
 				</div>
 				<div class="uk-width-1 uk-margin">
-					<button class="uk-button uk-button-primary" onclick="filter()" >Filrer</button>
+					<button class="uk-button uk-button-primary">Filrer</button>
 				</div>
-			</div>
+			</form>
 		</div>
 		<div class="uk-width-1-2@s uk-width-3-4@m uk-grid uk-grid-match" uk-grid id="results-wrapper">
 			<% for (let i = 0; i < users.length;i++) { %>

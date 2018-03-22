@@ -9,6 +9,7 @@ const db = database.db;
 
 const mail = require('../config/mail.js');
 const mainConfig = require('../config/main.js');
+const popModel = require('../models/pop.js')
 
 exports.signUp = (fname, name, uname, email, pass, conf, gender) => {
 	return new Promise(async (resolve, reject) => {
@@ -80,15 +81,30 @@ exports.signIn = (email, password) => {
 	});
 }
 
+exports.updateTime = (id) => {
+	return new Promise((resolve, reject) => {
+		db.query("UPDATE users SET lastonline = NOW() WHERE id = ?", [id], (err, data) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve();
+			}
+		});
+	});
+}
+
 exports.get = (id) => {
 	return new Promise((resolve, reject) => {
 		console.log("Getting user "+id);
-		db.query("SELECT id, name, firstname, username, email, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id = ?", [id], (err, data) => {
+		db.query("SELECT id, name, firstname, username, email, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags, fake, lastonline FROM users WHERE id = ?", [id], (err, data) => {
 			if (err) {
 				reject(err);
 			} else if (!data[0]) {
 				reject(new Error("Utilisateur introuvable"));
 			} else {
+				const lastonline = new Date(data[0].lastonline);
+				const textonline = lastonline.getDate()+'/'+(lastonline.getMonth()+1)+'/'+lastonline.getFullYear()+' à '+lastonline.getHours()+':'+lastonline.getMinutes()+':'+lastonline.getSeconds();
+				data[0].lastonline = textonline;
 				resolve(data[0]);
 			}
 		})
@@ -98,96 +114,124 @@ exports.get = (id) => {
 exports.getAll = (me) => {
 	return new Promise((resolve, reject) => {
 		db.query("SELECT location, interest, tags FROM users WHERE id = ?", [me], (err, mydata) => {
+			console.log(mydata[0]);
 			if (err) {
-				reject(err);
+				return reject(err);
+			} else if (!mydata[0] || !mydata[0].location || JSON.parse(mydata[0].tags).length <= 0) {
+				return reject("Veuillez compléter votre profil avec votre localisation et des tags d'intérêt");
 			} else {
-				db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id != ?", [me], async (err, data) => {
+				db.query("SELECT * FROM blocks WHERE owner = ?", [me], (err, blocked) => {
 					if (err) {
 						reject(err);
 					} else {
+						db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id != ?", [me], async (err, data) => {
+							if (err) {
+								reject(err);
+							} else {
 
-						// Tri des sexes, on dégage ce qui nous interesse pas
+								// On vire les bloqués
 
-						data = data.filter((elem) => {
-							if ((mydata[0].interest == 2 || mydata[0].interest == 1) && elem.gender == 1) {
-								return true;
-							}
-							if ((mydata[0].interest == 2 || mydata[0].interest == 0) && elem.gender == 0) {
-								return true;
-							}
-							return false
-						});
-
-						// On colle un ptit score de matching sur tags
-
-						const mytags = JSON.parse(mydata[0].tags);
-
-						data = data.map((elem) => {
-							let score = 0;
-							const toCheck = JSON.parse(elem.tags);
-							for(var i in mytags) {
-								for (var j in toCheck) {
-									if (mytags[i] == toCheck[j]) {
-										score++;
+								data = data.filter((e) => {
+									for(let f in blocked) {
+										if (blocked[f].target == e.id) {
+											return false;
+										}
 									}
+									return true;
+								});
+
+								// Tri des sexes, on dégage ce qui nous interesse pas
+
+								data = data.filter((elem) => {
+									if ((mydata[0].interest == 2 || mydata[0].interest == 1) && elem.gender == 1) {
+										return true;
+									}
+									if ((mydata[0].interest == 2 || mydata[0].interest == 0) && elem.gender == 0) {
+										return true;
+									}
+									return false
+								});
+
+								// On colle un ptit score de matching sur tags
+
+								const mytags = JSON.parse(mydata[0].tags);
+
+								data = data.map((elem) => {
+									let score = 0;
+									const toCheck = JSON.parse(elem.tags);
+									for(var i in mytags) {
+										for (var j in toCheck) {
+											if (mytags[i] == toCheck[j]) {
+												score++;
+											}
+										}
+									}
+									elem.score = score;
+									return elem;
+								});
+
+								const limit = data.length;
+								let i = 0;
+								while (i < limit) {
+									try {
+										if (mydata[0].location && data[i].location != null) {
+											console.log(data[i].location);
+											const res = await fetch('https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins='+mydata[0].location+'&destinations='+data[i].location+'&key=AIzaSyAQQdupWzfhiBYyCjdiG5RJfN1r04mhv9w');
+											const parsed = await res.json();
+											if (parsed && parsed.rows && parsed.rows[0] && parsed.rows[0].elements) {
+												const distance = parsed.rows[0].elements[0].distance.value / 1000;
+												data[i].distance = Math.floor(distance);
+												if (i === limit - 1) {
+
+													// On trie !
+													// Distance first !
+
+													data.sort((a, b) => {
+														if (a.distance < b.distance) {
+															return true;
+														} else {
+															return false;
+														}
+													});
+
+													// Interets ensuite
+
+													data.sort((a, b) => {
+														if (a.score < b.score) {
+															return true;
+														} else {
+															return false;
+														}
+													});
+
+													data.sort((a, b) => {
+														if (a.pop < b.pop) {
+															return true;
+														} else {
+															return false;
+														}
+													})
+
+													resolve(data);
+												}
+											} else {
+												data[i].distance = 0;
+											}
+										} else {
+											data[i].distance = 0;
+											if (i === limit - 1) {
+												resolve(data);
+											}
+										}
+									} catch (e) {
+										reject(e);
+									}
+									i++;
 								}
 							}
-							elem.score = score;
-							return elem;
-						});
-
-						const limit = data.length;
-						let i = 0;
-						while (i < limit) {
-							try {
-								const res = await fetch('https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins='+mydata[0].location+'&destinations='+data[i].location+'&key=AIzaSyAQQdupWzfhiBYyCjdiG5RJfN1r04mhv9w');
-								const parsed = await res.json();
-								if (parsed && parsed.rows) {
-									const distance = parsed.rows[0].elements[0].distance.value / 1000;
-									data[i].distance = Math.floor(distance);
-									if (i === limit - 1) {
-
-										// On trie !
-										// Distance first !
-
-										data.sort((a, b) => {
-											if (a.distance < b.distance) {
-												return true;
-											} else {
-												return false;
-											}
-										});
-
-										// Interets ensuite
-
-										data.sort((a, b) => {
-											if (a.score < b.score) {
-												return true;
-											} else {
-												return false;
-											}
-										});
-
-										data.sort((a, b) => {
-											if (a.pop < b.pop) {
-												return true;
-											} else {
-												return false;
-											}
-										})
-
-										resolve(data);
-									}
-								} else {
-									data[i].distance = 0;
-								}
-							} catch (e) {
-								reject(e);
-							}
-							i++;
-						}
+						})
 					}
-				})
+				});
 			}
 		})
 	});
@@ -211,119 +255,138 @@ exports.getFiltered = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 		db.query("SELECT location, interest, tags FROM users WHERE id = ?", [me], (err, mydata) => {
 			if (err) {
 				reject(err);
+			} else if (!mydata[0].location || !JSON.parse(mydata[0].tags).length) {
+				reject("Veuillez compléter votre profil avec votre localisation et des tags d'intérêt");
 			} else {
-				db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id != ? AND age >= ? AND age <= ? AND pop >= ? AND pop <= ? ", [me, ageMin, ageMax, popMin, popMax], async (err, data) => {
+				db.query("SELECT * FROM blocks WHERE owner = ?", [me], (err, blocked) => {
 					if (err) {
 						reject(err);
 					} else {
+						db.query("SELECT id, name, firstname, username, gender, interest, bio, photo1, photo2, photo3, photo4, photo5, age, location, pop, tags FROM users WHERE id != ? AND age >= ? AND age <= ? AND pop >= ? AND pop <= ? ", [me, ageMin, ageMax, popMin, popMax], async (err, data) => {
+							if (err) {
+								reject(err);
+							} else {
 
-						// Tri des sexes, on dégage ce qui nous interesse pas
+								// On vire les bloqués
 
-						data = data.filter((elem) => {
-							if ((mydata[0].interest == 2 || mydata[0].interest == 1) && elem.gender == 1) {
-								return true;
-							}
-							if ((mydata[0].interest == 2 || mydata[0].interest == 0) && elem.gender == 0) {
-								return true;
-							}
-							return false
-						});
-
-						// On colle un ptit score de matching sur tags
-
-						const mytags = JSON.parse(mydata[0].tags);
-
-						data = data.map((elem) => {
-							let score = 0;
-							const toCheck = JSON.parse(elem.tags);
-							for(var i in mytags) {
-								for (var j in toCheck) {
-									if (mytags[i] == toCheck[j]) {
-										score++;
+								data = data.filter((e) => {
+									for(let f in blocked) {
+										if (f.target == e.id) {
+											return false;
+										}
 									}
-								}
-							}
-							elem.score = score;
-							return elem;
-						});
+									return true;
+								});
 
-						const limit = data.length;
-						let i = 0;
-						while (i < limit) {
-							try {
-								const res = await fetch('https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins='+mydata[0].location+'&destinations='+data[i].location+'&key=AIzaSyAQQdupWzfhiBYyCjdiG5RJfN1r04mhv9w');
-								const parsed = await res.json();
-								if (parsed && parsed.rows ) {
-									const distance = parsed.rows[0].elements[0].distance.value / 1000;
-									data[i].distance = Math.floor(distance);
-									if (i === limit - 1) {
-										data = data.filter((one) => {
-											if (one.distance <= range) {
-												return true;
-											} else {
-												return false;
+								// Tri des sexes, on dégage ce qui nous interesse pas
+
+								data = data.filter((elem) => {
+									if ((mydata[0].interest == 2 || mydata[0].interest == 1) && elem.gender == 1) {
+										return true;
+									}
+									if ((mydata[0].interest == 2 || mydata[0].interest == 0) && elem.gender == 0) {
+										return true;
+									}
+									return false
+								});
+
+								// On colle un ptit score de matching sur tags
+
+								const mytags = JSON.parse(mydata[0].tags);
+
+								data = data.map((elem) => {
+									let score = 0;
+									const toCheck = JSON.parse(elem.tags);
+									for(var i in mytags) {
+										for (var j in toCheck) {
+											if (mytags[i] == toCheck[j]) {
+												score++;
 											}
-										})
-										data = data.filter((one) => {
-											const ref = JSON.parse(tags);
-											if (ref.length == 0) {
-												return true;
-											}
-											const toCheck = JSON.parse(one.tags);
-											for(var i in ref) {
-												console.log(ref[i]);
-												for (var j in toCheck) {
-													console.log(toCheck[j]);
-													if (ref[i] == toCheck[j]) {
+										}
+									}
+									elem.score = score;
+									return elem;
+								});
+
+								const limit = data.length;
+								let i = 0;
+								while (i < limit) {
+									try {
+										const res = await fetch('https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins='+mydata[0].location+'&destinations='+data[i].location+'&key=AIzaSyAQQdupWzfhiBYyCjdiG5RJfN1r04mhv9w');
+										const parsed = await res.json();
+										if (parsed && parsed.rows ) {
+											const distance = parsed.rows[0].elements[0].distance.value / 1000;
+											data[i].distance = Math.floor(distance);
+											if (i === limit - 1) {
+												data = data.filter((one) => {
+													if (one.distance <= range) {
+														return true;
+													} else {
+														return false;
+													}
+												})
+												data = data.filter((one) => {
+													const ref = JSON.parse(tags);
+													if (ref.length == 0) {
 														return true;
 													}
-												}
+													const toCheck = JSON.parse(one.tags);
+													for(var i in ref) {
+														console.log(ref[i]);
+														for (var j in toCheck) {
+															console.log(toCheck[j]);
+															if (ref[i] == toCheck[j]) {
+																return true;
+															}
+														}
+													}
+													return false;
+												});
+
+												// On trie !
+												// Distance first !
+
+												data.sort((a, b) => {
+													if (a.distance < b.distance) {
+														return true;
+													} else {
+														return false;
+													}
+												});
+
+												// Interets ensuite
+
+												data.sort((a, b) => {
+													if (a.score < b.score) {
+														return true;
+													} else {
+														return false;
+													}
+												});
+
+												data.sort((a, b) => {
+													if (a.pop < b.pop) {
+														return true;
+													} else {
+														return false;
+													}
+												})
+
+												resolve(data);
+
 											}
-											return false;
-										});
-
-										// On trie !
-										// Distance first !
-
-										data.sort((a, b) => {
-											if (a.distance < b.distance) {
-												return true;
-											} else {
-												return false;
-											}
-										});
-
-										// Interets ensuite
-
-										data.sort((a, b) => {
-											if (a.score < b.score) {
-												return true;
-											} else {
-												return false;
-											}
-										});
-
-										data.sort((a, b) => {
-											if (a.pop < b.pop) {
-												return true;
-											} else {
-												return false;
-											}
-										})
-
-										resolve(data);
-
+										} else {
+											data[i].distance = 0;
+										}
+									} catch (e) {
+										reject(e);
 									}
-								} else {
-									data[i].distance = 0;
+									i++;
 								}
-							} catch (e) {
-								reject(e);
 							}
-							i++;
-						}
+						})
 					}
-				})
+				});
 			}
 		});
 	});
@@ -427,6 +490,33 @@ exports.forgot = (email) => {
 						}
 					});
 				}
+			}
+		})
+	});
+}
+
+exports.fakeToggle = (from, to) => {
+	return new Promise((resolve, reject) => {
+		db.query("SELECT fake FROM users WHERE id = ?", [to], async (err, data) => {
+			if (err) {
+				return reject(err)
+			} else {
+				const fake = JSON.parse(data[0].fake);
+				const index = fake.indexOf(from);
+				if (index >= 0) {
+					await popModel.alter(to, +25);
+					fake.splice(index, 1);
+				} else {
+					await popModel.alter(to, -25);
+					fake.push(from);
+				}
+				db.query("UPDATE users SET ? WHERE id = ?", [{ fake : JSON.stringify(fake) }, to], (err, data) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve();
+					}
+				});
 			}
 		})
 	});

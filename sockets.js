@@ -1,7 +1,7 @@
 
 const notifModel = require('./models/notif.js');
 const messageModel = require('./models/message.js');
-
+const userModel = require('./models/user.js');
 
 module.exports = {
 
@@ -54,6 +54,7 @@ module.exports = {
 			});
 
 			socket.on('disconnect', () => {
+				userModel.updateTime(me);
 				if (me) {
 					delete this.online[me];
 					this.io.sockets.emit('logout', {

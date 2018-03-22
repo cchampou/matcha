@@ -24,13 +24,17 @@
 		</div>
 		<div class="uk-width-1-2@s uk-width-2-3@m">
 			<h2><%= user.firstname %> <%= user.name %> (<%= user.username %>) <span class="uk-badge"><%= user.pop %></span></h2>
+			<% if (JSON.parse(user.fake).length > 0) { %>
+				<p class="uk-alert uk-alert-danger">Attention ce compte a été signalé comme fake par <%= JSON.parse(user.fake).length %> personne(s) !</p>
+			<% } %>
 			<p>
 				<%= (user.age) ? user.age+' ans ' : 'Âge inconnu ' %>|
 				<% if(user.location) { %><span class="uk-icon" uk-icon="location"></span> <%= user.location+' ' %><% } else { %>Localisation inconnue <% } %>|
 				<%= (user.interest != null) ? 'Interessé par ' : 'Intérets inconnus' %>
 				<%= (user.interest == 0) ? 'les hommes' : '' %>
 				<%= (user.interest == 1) ? 'les femmes' : '' %>
-				<%= (user.interest == 2) ? 'les femmes et les hommes' : '' %>
+				<%= (user.interest == 2) ? 'les femmes et les hommes' : '' %> |
+				<span class="uk-badge" style="background-color: #8BC34A; display: none;" id="online">&nbsp;En ligne&nbsp;</span><span class="uk-badge" style="background-color: gray;" id="lastonline">&nbsp;Dernière connexion le <%= user.lastonline %>&nbsp;</span><br /><br />
 			</p>
 			<% if (userId == user.id) { %>
 				<a href="/user/edit" class="uk-button uk-button-primary"><span class="uk-icon" uk-icon="pencil"></span> Editer mon profil</a>
@@ -38,8 +42,15 @@
 				<% if (data.liked) { %>
 					<%= data.gender ? 'Elle' : 'Il' %> me kiff&nbsp;&nbsp;
 				<% } %>
-				<a href="/like/<%= data.like ? 'delete' : 'create' %>/<%= user.id %>" class="uk-button <%= data.like ? 'uk-button-danger' : 'uk-button-default' %>"><span class="uk-icon" uk-icon="heart"></span> Je <%= data.gender ? 'la' : 'le' %> kiff<%= data.like ? ' plus' : '' %></a>
+				<% if (user.photo1) { %>
+					<a href="/like/<%= data.like ? 'delete' : 'create' %>/<%= user.id %>" class="uk-button <%= data.like ? 'uk-button-danger' : 'uk-button-default' %>"><span class="uk-icon" uk-icon="heart"></span> Je <%= data.gender ? 'la' : 'le' %> kiff<%= data.like ? ' plus' : '' %></a>
+				<% } %>
 				<a href="/block/toggle/<%= user.id %>" class="uk-button uk-button-secondary"><span class="uk-icon" uk-icon="ban"></span> Bloquer</a>
+				<% if (user.faked) { %>
+					<a href="/user/fake/<%= user.id %>" class="uk-button uk-button-secondary"><span class="uk-icon" uk-icon="ban"></span> Retirer mon signalement</a>
+				<% } else { %>
+					<a href="/user/fake/<%= user.id %>" class="uk-button uk-button-secondary"><span class="uk-icon" uk-icon="ban"></span> Signaler comme fake</a>
+				<% } %>
 			<% } %>
 			<div class="uk-margin">
 				<ul id="taglist">
@@ -52,4 +63,22 @@
 		</div>
 	</div>
 </div>
+<script>
+socket.on('login', (user) => {
+	if (user.id == <%= user.id %>) {
+		$('#online').show();
+		$('#lastonline').hide();
+	}
+})
+
+socket.on('logout', (user) => {
+	if (user.id == <%= user.id %>) {
+		$('#online').hide();
+		const lastonline = new Date();
+		const textonline = '&nbsp;Dernière connexion le '+lastonline.getDate()+'/'+(lastonline.getMonth()+1)+'/'+lastonline.getFullYear()+' à '+lastonline.getHours()+':'+lastonline.getMinutes()+':'+lastonline.getSeconds()+'&nbsp;';
+		$('#lastonline').html(textonline);
+		$('#lastonline').show();
+	}
+});
+</script>
 <% include ../partials/footer %>

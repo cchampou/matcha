@@ -56,10 +56,15 @@ module.exports = {
 	get: (req, res) => {
 		return new Promise(async (resolve, reject) => {
 			if (!req.params.id && !req.session.userId) {
-				reject(new Error("Aucun utilisateur pointé"));
+				return reject(new Error("Aucun utilisateur pointé"));
 			}
 			try {
 				data = await userModel.get((req.params.id)?req.params.id:req.session.userId);
+				if (data.fake.indexOf(req.session.userId) >= 0) {
+					data.faked = true;
+				} else {
+					data.faked = false;
+				}
 				data.notifs = await notifModel.get(req.session.userId);
 				data.likes = await likeModel.get((req.params.id)?req.params.id:req.session.userId,(req.params.id)?req.params.id:req.session.userId);
 				data.like = false;
@@ -115,6 +120,7 @@ module.exports = {
 				const data = await userModel.getAll(req.session.userId);
 				resolve(data);
 			} catch(e) {
+				console.log(e);
 				reject(e);
 			}
 		});

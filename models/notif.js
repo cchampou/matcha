@@ -10,53 +10,63 @@ exports.create = (owner, target, type) => {
 		if (owner == target) {
 			return resolve();
 		}
-		db.query("SELECT * FROM notifs WHERE owner = ? AND target = ? AND type = ?", [owner, target, type], (err, data1) => {
+		db.query("SELECT * FROM blocks WHERE owner = ? AND target = ?", [target, owner], (err, data) => {
 			if (err) {
-				console.log(err);
-				return reject(err);
+				reject(err);
 			} else {
-				if (data1[0] && type == 0) {
-					return resolve();
-				}
-				db.query("SELECT * FROM notifs WHERE owner = ? AND target = ? AND type = 1", [target, owner], (err, data) => {
-					if (err) {
-						console.log(err);
-						return reject(err);
-					} else if (data[0] && data[0].type == 1 && type == 1) {
-						type = 2;
-					}
-					db.query("INSERT INTO notifs SET ?", {
-						owner: owner,
-						target: target,
-						type: type
-					}, async (err, data) => {
+				if (!data[0]) {
+					db.query("SELECT * FROM notifs WHERE owner = ? AND target = ? AND type = ?", [owner, target, type], (err, data1) => {
 						if (err) {
 							console.log(err);
-							reject(err);
+							return reject(err);
 						} else {
-							const fromUser = await userModel.get(owner);
-							sockets.emitNotif(fromUser, target, type);
-							if (type == 2) {
+							if (data1[0] && type == 0) {
+								return resolve();
+							}
+							db.query("SELECT * FROM notifs WHERE owner = ? AND target = ? AND type = 1", [target, owner], (err, data) => {
+								if (err) {
+									console.log(err);
+									return reject(err);
+								} else if (data[0] && data[0].type == 1 && type == 1) {
+									type = 2;
+								}
 								db.query("INSERT INTO notifs SET ?", {
-									owner: target,
-									target: owner,
+									owner: owner,
+									target: target,
 									type: type
 								}, async (err, data) => {
 									if (err) {
 										console.log(err);
 										reject(err);
 									} else {
-										const fromUser = await userModel.get(target);
-										sockets.emitNotif(fromUser, owner, type);
-										return resolve();
+										const fromUser = await userModel.get(owner);
+										sockets.emitNotif(fromUser, target, type);
+										if (type == 2) {
+											db.query("INSERT INTO notifs SET ?", {
+												owner: target,
+												target: owner,
+												type: type
+											}, async (err, data) => {
+												if (err) {
+													console.log(err);
+													reject(err);
+												} else {
+													const fromUser = await userModel.get(target);
+													sockets.emitNotif(fromUser, owner, type);
+													return resolve();
+												}
+											})
+										} else {
+											return resolve();
+										}
 									}
 								})
-							} else {
-								return resolve();
-							}
+							});
 						}
-					})
-				});
+					});
+				} else {
+					resolve();
+				}
 			}
 		});
 	});
