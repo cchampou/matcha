@@ -211,24 +211,28 @@ exports.getAll = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 
 								// On colle un ptit score de matching sur tags
 
-								data = data.filter((one) => {
-									const ref = JSON.parse(tags);
-									if (ref.length == 0) {
-										return true;
-									}
-									const toCheck = JSON.parse(one.tags);
-									for(var i in ref) {
-										console.log(ref[i]);
-										for (var j in toCheck) {
-											console.log(toCheck[j]);
-											if (ref[i] == toCheck[j]) {
-												return true;
+								if (tags) {
+									data = data.filter((one) => {
+										console.log(tags);
+										const ref = JSON.parse(tags);
+										if (ref.length == 0) {
+											return true;
+										}
+										const toCheck = JSON.parse(one.tags);
+										for(var i in ref) {
+											console.log(ref[i]);
+											for (var j in toCheck) {
+												console.log(toCheck[j]);
+												if (ref[i] == toCheck[j]) {
+													return true;
+												}
 											}
 										}
-									}
-									return false;
-								});
-								
+										return false;
+									});	
+								}
+
+
 								const mytags = JSON.parse(mydata[0].tags);
 
 								data = data.map((elem) => {
