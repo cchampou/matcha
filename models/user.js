@@ -229,7 +229,7 @@ exports.getAll = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 											}
 										}
 										return false;
-									});	
+									});
 								}
 
 
@@ -254,45 +254,53 @@ exports.getAll = (me, ageMin, ageMax, popMin, popMax, tags, range) => {
 									console.log(i+'/'+limit);
 									try {
 										if (mydata[0].location && data[i].location != null) {
-											const res = await fetch('https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins='+mydata[0].location+'&destinations='+data[i].location+'&key='+config.API);
-											const parsed = await res.json();
-											if (parsed && parsed.rows && parsed.rows[0] && parsed.rows[0].elements && parsed.rows[0].elements[0] && parsed.rows[0].elements[0].distance) {
-												const distance = parsed.rows[0].elements[0].distance.value / 1000;
-												data[i].distance = Math.floor(distance);
-												if (i === limit - 1) {
+											try {
+												console.log("lol");
+												const res = await fetch('https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins='+mydata[0].location+'&destinations='+data[i].location+'&key='+config.API);
+												const parsed = await res.json();
+												console.log(parsed);
+												if (parsed && parsed.rows && parsed.rows[0]) {
+													console.log("hello");
+													const distance = parsed.rows[0].elements[0].distance.value / 1000;
+													data[i].distance = Math.floor(distance);
+													if (i === limit - 1) {
 
-													if (range) {
-														data = data.filter((one) => {
-															if (one.distance <= range) {
-																return true;
-															} else {
-																return false;
-															}
+														if (range) {
+															data = data.filter((one) => {
+																if (one.distance <= range) {
+																	return true;
+																} else {
+																	return false;
+																}
+															});
+														}
+
+														data.sort((a, b) => {
+															return (a.distance - b.distance);
 														});
+
+														data.sort((a, b) => {
+															return (b.pop - a.pop);
+														})
+
+														// Interets ensuite
+
+														data.sort((a, b) => {
+															return (b.score - a.score);
+														});
+
+
+														resolve(data);
 													}
-
-													data.sort((a, b) => {
-														return (a.distance - b.distance);
-													});
-
-													data.sort((a, b) => {
-														return (b.pop - a.pop);
-													})
-
-													// Interets ensuite
-
-													data.sort((a, b) => {
-														return (b.score - a.score);
-													});
-
-
-													resolve(data);
+												} else {
+													data[i].distance = Math.floor(Math.random() * 1000);
+													if (i === limit - 1) {
+														resolve(data);
+													}
 												}
-											} else {
-												data[i].distance = Math.floor(Math.random() * 1000);
-												if (i === limit - 1) {
-													resolve(data);
-												}
+											} catch (e) {
+												console.log(e);
+												return reject(e);
 											}
 										} else {
 											data[i].distance = 0;
