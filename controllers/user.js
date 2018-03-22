@@ -129,7 +129,7 @@ module.exports = {
 	getFiltered: (req, res) => {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const data = await userModel.getFiltered(req.session.userId, req.body.ageMin, req.body.ageMax, req.body.popMin, req.body.popMax, req.body.tags, req.body.range);
+				const data = await userModel.getAll(req.session.userId, req.body.ageMin, req.body.ageMax, req.body.popMin, req.body.popMax, req.body.tags, req.body.range);
 				resolve(data);
 			} catch(e) {
 				console.log(e);
